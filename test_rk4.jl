@@ -10,7 +10,20 @@ function RK4(X,U,step,f)
     return next_states
 end
 
-X = SA[0,0,0,0,0,0,0,0,0,0,300]
+X = SA[0,0,0,1,0,0,0,15,0,0,300]
 U0 = SA[100,0,0,0]
-step = 0.1
+step = 0.01
 solution = RK4(X,U0,step, f)
+println("X = ", solution)
+
+t = 0 
+T = 0.01
+dt = 0.01
+x_stockage = zeros(Float64, 10, 3)
+while t < T  
+    t = t + dt 
+    X = RK4(X,U0,step,f)
+    x_stockage[t,:] = X[1:3]
+end
+
+println("solution : ", x_stockage)

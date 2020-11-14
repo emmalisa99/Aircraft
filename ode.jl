@@ -25,8 +25,8 @@ function f(X,U,t=0)  ## pb avec autres paramètres
         U[4] U[3] -U[2] 0]                            # matrix for quaternion 
     
     norm2_speed = (X[4]^2 + X[5]^2 + X[6]^2) 
-    alpha = asin(-X[6]/norm2_speed) 
-    beta = asin(-X[5]/norm2_speed)
+    alpha = 1 #asin(-X[6]/max(X[4], X[5], X[6])) 
+    beta = 1 #asin(-X[5]/max(X[4], X[5], X[6]))
     ca = cos(alpha)
     cb = cos(beta)
     sa = sin(alpha)
@@ -35,13 +35,13 @@ function f(X,U,t=0)  ## pb avec autres paramètres
             sb cb 0;
             -sa*cb sa*sb ca]                           # "passage" matrix to wind coordinate to aircraft coordinate 
     C_D = aircraft_cst.C_D0  + aircraft_cst.C_D_alpha2*alpha^2
-    Cst_DCL = SA[-C_D -aircraft_cst.C_C_beta aircraft_cst.C_L_alpha ] 
+    Cst_DCL = SA[-C_D ; -aircraft_cst.C_C_beta ; aircraft_cst.C_L_alpha ] 
     eta_a = rho(X[3], pressure, physical_data.r,physical_data.T) * aircraft_cst.Sw * 0.5 
-    Fa = eta_a * norm2_speed * P_B2W * transpose(Cst_DCL)         # aerodynamical forces
+    Fa = eta_a * norm2_speed * P_B2W * Cst_DCL         # aerodynamical forces
     Xp = Vector(undef, 11)
     Xp[1:4] = X[4:7]                                    # dot x = v
 
-    Xp[4:6] =  g + U[1]/X[11] * (kt*X[4:6] + i) #Fa/X[11] +
+    Xp[4:6] = Fa/X[11] + g + U[1]/X[11] * (kt*X[4:6] + i) #
     Xp[7:10] = 1/2 * M * X[7:10]
     Xp[11] = -kt * U[1]                                 # dot m = -kt * trhust : variation of fuel
     return Xp
