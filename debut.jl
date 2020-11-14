@@ -1,5 +1,5 @@
 using StaticArrays
-using Ipopt
+# using Ipopt
 
 struct physic_cst 
     g::SVector{3, Float64}      #Gravity vector
@@ -48,7 +48,7 @@ mutable struct MiniBee_cst
 end 
 
 function pressure(height)
-    p = 1013.25 * (1 - 0.0065*height * (1.0/288.15))**(5.255)
+    p = 1013.25 * (1 - 0.0065*height * (1.0/288.15))^(5.255)
     return p
 end
 
@@ -65,30 +65,30 @@ println(cst)
 Partie optimisation
 """
 
-function eval_f(X,U,tf)    #Fonction coût
-    return 
-end
+# function eval_f(X,U,tf)    #Fonction coût
+#     return 
+# end
 
-function eval_g(X,U,tf)     #Fonction contraintes
-    return
-end
+# function eval_g(X,U,tf)     #Fonction contraintes
+#     return
+# end
 
-function eval_grad_f(X,U)   #A voir : utilisation de modules de différenciation ?
-    return
-end
+# function eval_grad_f(X,U)   #A voir : utilisation de modules de différenciation ?
+#     return
+# end
 
-function eval_jac_g(X,U,tf)     #A voir : rows, values, cols ? (qu'est ce que c'est ?)
-    return
-end
+# function eval_jac_g(X,U,tf)     #A voir : rows, values, cols ? (qu'est ce que c'est ?)
+#     return
+# end
 
-function eval_h(X,U,tf)     #peut être pas nécessaire
-    return 
-end 
+# function eval_h(X,U,tf)     #peut être pas nécessaire
+#     return 
+# end 
 
-prob = createProblem(n, x_L, x_U, m, g_L, g_U, 8, 10, eval_f, eval_g, eval_grad_f, eval_jac_g, eval_h)
-prob.x =    #Set starting solution
-status = solveProblem(prob)
+# prob = createProblem(n, x_L, x_U, m, g_L, g_U, 8, 10, eval_f, eval_g, eval_grad_f, eval_jac_g, eval_h)
+# prob.x =    #Set starting solution
+# status = solveProblem(prob)
 
-println(Ipopt.ApplicationReturnStatus[status])
-println(prob.x)
-println(prob.obj_val)
+# println(Ipopt.ApplicationReturnStatus[status])
+# println(prob.x)
+# println(prob.obj_val)

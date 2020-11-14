@@ -1,5 +1,5 @@
 using DifferentialEquations
-using debut
+include("debut.jl")
 
 
 physical_data = physic_cst()
@@ -10,10 +10,10 @@ aircraft_cst = MiniBee_cst(aircraft)
 # U = [U1,  U2,U3,U4]
 
 
-function f(X,U, physical_data,aircraft,aircraft_cst):  ## pb avec autres paramètres
+function f(X,U, physical_data,aircraft,aircraft_cst) ## pb avec autres paramètres
     
     g = physical_data.g                               # gravity
-    kt = avion.kt                                     # constant relative to the aircraft
+    kt = aircraft.kt                                     # constant relative to the aircraft
     
     i =  SA[ 2*(X[7]^2+ X[8]^2)-1 , 
              2*(X[8]*X[9]+X[7]*X[10]) ,
@@ -46,12 +46,12 @@ function f(X,U, physical_data,aircraft,aircraft_cst):  ## pb avec autres paramè
 
 end
 
-f_ode = ODEFunction(f) # y a t il d'autres truc à mettre ? 
-u_0 = 
-t_span = 
-p = 
-kwargs = 
+# f_ode = ODEFunction(f) # y a t il d'autres truc à mettre ? 
+# u_0 = 
+# t_span = 
+# p = 
+# kwargs = 
 
-problem_ode = ODEProblem(f_ode,u0,tspan,p,kwargs)
-sol = solve(ODE)
+# problem_ode = ODEProblem(f_ode,u0,tspan,p,kwargs)
+# sol = solve(ODE)
 
