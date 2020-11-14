@@ -52,7 +52,7 @@ function pressure(height)
     return p
 end
 
-function rho(height, pressure)
+function rho(height, pressure, r, T)
     return 100 * pressure(height) * (1.0 / (r * T))
 end 
 
