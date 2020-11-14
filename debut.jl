@@ -48,7 +48,7 @@ mutable struct MiniBee_cst
 end 
 
 function pressure(height)
-    p = 1013.25 * (1 - 0.0065*height * (1.0/288.15))**(5.255)
+    p = 1013.25 * (1 - 0.0065*height * (1.0/288.15))^(5.255)
     return p
 end
 
