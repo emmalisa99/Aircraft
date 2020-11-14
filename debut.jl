@@ -47,6 +47,16 @@ mutable struct MiniBee_cst
     end
 end 
 
+function pressure(height)
+    p = 1013.25 * (1 - 0.0065*height * (1.0/288.15))**(5.255)
+    return p
+end
+
+function rho(height, pressure)
+    return 100 * pressure(height) * (1.0 / (r * T))
+end 
+
+
 av = avion()
 cst = MiniBee_cst(av)
 println(cst)
