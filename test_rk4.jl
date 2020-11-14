@@ -17,9 +17,9 @@ solution = RK4(X,U0,step, f)
 println("X = ", solution)
 
 t = 0 
-T = 0.01
-dt = 0.01
-x_stockage = zeros(Float64, 10, 3)
+T = 20
+dt = 1
+x_stockage = zeros(Float64, 20, 3)
 while t < T  
     t = t + dt 
     X = RK4(X,U0,step,f)
