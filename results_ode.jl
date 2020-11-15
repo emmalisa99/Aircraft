@@ -51,13 +51,12 @@ plot!(trajectory[3,:])
 # initialisation
 X = SA[0,0,0,1,0,0,0,15,0,0,300]
 U0 = SA[100,0,0,0]
-step = 0.01
 # parameters of rk4
-t = 0 
-T = 20
-dt = 1
+t = 0.
+T = 0.2
+dt = 0.01
 #resolution
-@time x_stockage = RK4(t,T,dt,X,U0,step,f)
+@time x_stockage = RK4(t,T,dt,X,U0,f)
 
 println("Solution : ", x_stockage)
 
@@ -68,12 +67,12 @@ plt = plot3d(
     marker = 2,
 )
 
-@gif for i=1:size(trajectory)[2]
+@gif for i=1:size(trajectory)[1]
      push!(plt,x_stockage[i,1], x_stockage[i,2], x_stockage[i,3])
  end every 20
 
 @show(plt)
 
-plt_coord = plot(x_stockage[:,1], title="trajectory on the different axes")
+plt_coord = plot(x_stockage[:,1], title="trajectory on the different axes - rk4")
 plot!(x_stockage[:,2])
 plot!(x_stockage[:,3])
