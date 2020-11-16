@@ -35,7 +35,9 @@ function f(X,U,t=0)
             sb cb 0;
             -sa*cb sa*sb ca]                            # "passage" matrix to wind coordinate to aircraft coordinate 
     C_D = aircraft_cst.C_D0  + aircraft_cst.C_D_alpha2*alpha^2
-    Cst_DCL = SA[-C_D ; -aircraft_cst.C_C_beta ; aircraft_cst.C_L_alpha ] 
+    C_C = aircraft_cst.C_C_beta * beta
+    C_L = aircraft_cst.C_L_alpha * alpha
+    Cst_DCL = SA[-C_D ; -C_C ; C_L ] 
     eta_a = rho(X[3], pressure, physical_data.r,physical_data.T) * aircraft_cst.Sw * 0.5 
     norm2_speed = (X[4]^2+X[5]^2+X[6]^2)
     Fa = eta_a * norm2_speed * P_I2B * P_B2W * Cst_DCL  # aerodynamical forces
