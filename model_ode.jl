@@ -9,18 +9,18 @@ function f(X,U,t=0)
        U = [U1,  U2,U3,U4] : thrust and others forces for the rotation
     """
     
-    i =  SA[2*(X[7]^2+ X[8]^2)-1 , 
-             2*(X[8]*X[9]+X[7]*X[10]) ,
-             2*(X[8]*X[10]-X[7]*X[9]) ]               # effect of the rotation on speed
+    i =  SA[2*(X[7]^2+X[8]^2)-1 , 
+            2*(X[8]*X[9]+X[7]*X[10]) ,
+            2*(X[8]*X[10]-X[7]*X[9]) ]               # effect of the rotation on speed
     
     M = [0 -U[2] -U[3] -U[4] ;
         U[2] 0 U[4] -U[3] ; 
         U[3] -U[4] 0 U[2] ; 
         U[4] U[3] -U[2] 0]                            # matrix for quaternion 
 
-    P_I2B = [2*(X[7]^2+X[8]^2)-1  2*(X[8]*X[9]-X[7]*X[9])  2*(X[8]*X[9]+X[9]*X[7]);
-          2*(X[8]*X[9]+X[7]*X[9])  2*(X[7]^2 + X[9]^2)-1  2*(X[9]*X[9]+X[8]*X[7]);
-          2*(X[8]*X[9]-X[9]*X[7])  2*(X[9]*X[9] + X[8]*X[7])  2*(X[7]^2+X[9]^2) - 1]
+    P_I2B = [2*(X[7]^2+X[8]^2)-1       2*(X[8]*X[9]-X[7]*X[10])  2*(X[8]*X[10]+X[9]*X[7]);
+             2*(X[8]*X[9]+X[7]*X[10])  2*(X[7]^2+X[9]^2)-1       2*(X[9]*X[10]-X[8]*X[7]);
+             2*(X[8]*X[10]-X[9]*X[7])  2*(X[9]*X[10]+X[8]*X[7])  2*(X[7]^2+X[10]^2)-1]
 
     v_body = inv(P_I2B) * X[4:6]
     norm2_v_body = (v_body[1]^2 + v_body[2]^2 + v_body[3]^2) 
