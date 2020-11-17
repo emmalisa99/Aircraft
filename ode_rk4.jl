@@ -24,7 +24,7 @@ function U_t(t)
 end
 
 function RK4(t::Float64,T::Float64,dt::Float64,X,U0,f)
-    nb_iter = Int(T/dt)+1
+    nb_iter = Int(T/dt)
     x_stockage = zeros(Float64, nb_iter, 4)
     iter = 1
     while t < T  
@@ -49,5 +49,3 @@ function test()
     x_stockage = RK4(t,T,dt,X,U,f)
     println("Solution : ", x_stockage)
 end
-
-test()

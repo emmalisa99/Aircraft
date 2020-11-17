@@ -50,7 +50,7 @@ function f(X,Ut,t=0)
     
     Xp = Vector(undef, 11)
     Xp[1:3] = X[4:6]                                    # dot x = v
-    Xp[4:6] =  physical_data.g + U[1]/X[11] * (aircraft.kt*X[4:6] + i) + Fa/X[11] 
+    Xp[4:6] =  Fa/X[11] - physical_data.g  + U[1]/X[11] * (aircraft.kt*X[4:6] + i) 
     Xp[7:10] = 1/2 * M * X[7:10]
     Xp[11] = -aircraft.kt * U[1]                        # dot m = -kt * trhust : variation of fuel
 
