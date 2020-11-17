@@ -1,6 +1,6 @@
 include("debut.jl")
 
-function f(X,U,t=0)  
+function f(X,Ut,t=0)  
     """
     dot X = f(X,U)
     modelling the physical behavior of the aircraft
@@ -8,7 +8,9 @@ function f(X,U,t=0)
        X = [x1,x2,x3,  v1,v2,v3,  q1,q2,q3,q4, m] : position, speed, quaternion, masse
        U = [U1,  U2,U3,U4] : thrust and others forces for the rotation
     """
-    
+
+    U = Ut(t)
+
     i =  SA[2*(X[7]^2+X[8]^2)-1 , 
             2*(X[8]*X[9]+X[7]*X[10]) ,
             2*(X[8]*X[10]-X[7]*X[9]) ]               # effect of the rotation on speed
@@ -37,17 +39,17 @@ function f(X,U,t=0)
     sb = cos(beta)
     P_B2W = [ ca*cb -ca*sb sa;
             sb cb 0;
-            -sa*cb sa*sb ca]                            # "passage" matrix to wind coordinate to aircraft coordinate 
-    C_D = aircraft_cst.C_D0  + aircraft_cst.C_D_alpha2*alpha^2
+            -sa*cb sa*sb ca]                             # "passage" matrix to wind coordinate to aircraft coordinate 
+    C_D = aircraft_cst.C_D0  + aircraft_cst.C_D_alpha2 * alpha^2
     C_C = aircraft_cst.C_C_beta * beta
     C_L = aircraft_cst.C_L_alpha * alpha
     Cst_DCL = SA[-C_D ; -C_C ; C_L ] 
-    eta_a = rho(X[3], pressure, physical_data.r,physical_data.T) * aircraft_cst.Sw * 0.5 
+    eta_a = rho(X[3], pressure, physical_data.r,physical_data.T) * aircraft_cst.Sw * 0.5
     norm2_speed = (X[4]^2+X[5]^2+X[6]^2)
     Fa = eta_a * norm2_speed * P_I2B * P_B2W * Cst_DCL  # aerodynamical forces
     
     Xp = Vector(undef, 11)
-    Xp[1:4] = X[4:7]                                    # dot x = v
+    Xp[1:3] = X[4:6]                                    # dot x = v
     Xp[4:6] =  physical_data.g + U[1]/X[11] * (aircraft.kt*X[4:6] + i) + Fa/X[11] 
     Xp[7:10] = 1/2 * M * X[7:10]
     Xp[11] = -aircraft.kt * U[1]                        # dot m = -kt * trhust : variation of fuel

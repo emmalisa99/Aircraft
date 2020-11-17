@@ -1,6 +1,6 @@
 include("model_ode.jl")
 
-function iter_RK4(X,U,step,f)
+function iter_RK4(X,U,step::Float64,f)
     k1 = f(X,U)
     k2 = f(X + k1*step/2, U)
     k3 = f(X + k2*step/2, U)
@@ -19,8 +19,12 @@ function test_RK4()
     println("X = ", solution)
 end
 
-function RK4(t,T,dt,X,U0,f)
-    nb_iter = Int(T/dt)
+function U_t(t)
+    return SA[100,0,0,0]
+end
+
+function RK4(t::Float64,T::Float64,dt::Float64,X,U0,f)
+    nb_iter = Int(T/dt)+1
     x_stockage = zeros(Float64, nb_iter, 4)
     iter = 1
     while t < T  
@@ -36,12 +40,14 @@ end
 function test()
     # initialisation
     X = SA[0,0,0,1,0,0,0,15,0,0,300]
-    U0 = SA[100,0,0,0]
+    U = U_t#SA[100,0,0,0]
     # parameters of rk4
     t = 0.
     T = 0.2
     dt = 0.01
     #resolution
-    x_stockage = RK4(t,T,dt,X,U0,f)
+    x_stockage = RK4(t,T,dt,X,U,f)
     println("Solution : ", x_stockage)
 end
+
+test()

@@ -13,14 +13,20 @@ aircraft_cst = MiniBee_cst(aircraft)
 ####            Version with julia solver            ####
 #########################################################
 f_ode = ODEFunction(f) # y a t il d'autres truc à mettre ? 
-u_0 = SA[0,0,0,1,0,0,0,0,0,15,300]
+X_0 = SA[0,0,0,10,0,0,15,0,0,0,300]
+function Ut(t)
+    if t < 1
+        return SA[500,0,0,0]
+    else 
+        return SA[500,0,0,0]
+    end
+end
 Tmax = 1
-t_span = (0,Tmax)
-p = SA[50,0,0,0]
+t_span = (0,Tmax) 
 
 println("Time Julia Solver : ")
 @time begin
-    problem_ode = ODEProblem(f_ode,u_0,t_span,p)
+    problem_ode = ODEProblem(f_ode,X_0,t_span,Ut,dtmax=t_span[2]/100)
     sol = solve(problem_ode)
 end
 
@@ -36,28 +42,31 @@ plt = plot3d(
 )
 
 @gif for i=1:size(trajectory)[2]
-     push!(plt,trajectory[1,i], trajectory[2,i], trajectory[3,i])
- end every 20
+      push!(plt,trajectory[1,i], trajectory[2,i], trajectory[3,i])
+    end every 1
 
-@show(plt)
+# @show(plt)
 
 plt_coord = plot(trajectory[1,:], title="trajectory on the different axes")
 plot!(trajectory[2,:])
 plot!(trajectory[3,:])
 
-
+#@show plt
 
 
 #########################################################
 ####                Version with RK4                 ####
 #########################################################
+function U_t(t)
+    return SA[100,0,0,0]
+end
 
 # initialisation
 X = SA[0,0,0,1,0,0,0,15,0,0,300]
-U0 = SA[100,0,20,0]
+U0 = U_t
 # parameters of rk4
 t = 0.
-T = 0.2
+T = 0.1
 dt = 0.01
 step = 0.1
 #resolution

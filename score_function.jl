@@ -30,16 +30,15 @@ X = SA[0,0,0,1,0,0,0,15,0,0,300]
 U0 = SA[100,0,0,0]
 step = 0.01
 # parameters of rk4
-t = 0 
+t = 0.0
 T = 0.2
 dt = 0.01
 #resolution
-@time X_stockage = RK4(t,T,dt,X,U0,f)
+# @time X_stockage = RK4(t,T,dt,X,U0,f)
+# X_final = SA[0.791827;   0.0177039;    0.219864]
 
-X_final = SA[0.791827;   0.0177039;    0.219864]
 
-
-println("Test : ")
-println("Attendu : (fuel)20+(dist)0+(temps)0.2")
-println("Score = ",J(X_stockage,X_final,X,dt, "RK4"))
+# println("Test : ")
+# println("Attendu : (fuel)20+(dist)0+(temps)0.2")
+# println("Score = ",J(X_stockage,X_final,X,dt, "RK4"))
 
