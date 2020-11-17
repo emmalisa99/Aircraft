@@ -24,9 +24,13 @@ function f(X,U,t=0)
 
     v_body = inv(P_I2B) * X[4:6]
     norm2_v_body = (v_body[1]^2 + v_body[2]^2 + v_body[3]^2) 
+    norminf_v_body = max(v_body[1], v_body[2], v_body[3])
 
-    alpha = asin(-X[6]/sqrt(norm2_v_body)) #
-    beta = asin(-X[5]/sqrt(norm2_v_body))  #
+    # alpha = asin(-X[6]/norminf_v_body) #
+    # beta = asin(-X[5]/norminf_v_body)  #
+
+    alpha = asin(-v_body[3]/ sqrt( norm2_v_body))
+    beta = asin(-v_body[2]/ sqrt(norm2_v_body))
     ca = cos(alpha)
     cb = cos(beta)
     sa = sin(alpha)

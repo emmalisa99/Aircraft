@@ -2,9 +2,17 @@ using LinearAlgebra
 include("ode_rk4.jl")
 
 
-function J(X_storage,x_final,X_0,dt)
+function J(X_storage,x_final,X_0,time,method)
+    """
+    Quand method = "RK4", time représente dt 
+    Quand method = "Julia_solver", time représente le temps de trajet
+    """
     Tmax = size(X_storage)[1]
-    trajectory_time = dt * Tmax
+    if method == "RK4"
+        trajectory_time = time * Tmax
+    else 
+        trajectory_time = time
+    end
     fuel_consumtion = abs(X_storage[Tmax,4]- X_0[11])
     is_finalState = norm(X_storage[Tmax,1:3] - x_final)
     J = is_finalState + fuel_consumtion + trajectory_time
@@ -33,5 +41,5 @@ X_final = SA[0.791827;   0.0177039;    0.219864]
 
 println("Test : ")
 println("Attendu : (fuel)20+(dist)0+(temps)0.2")
-println("Score = ",J(X_stockage,X_final,X,dt))
+println("Score = ",J(X_stockage,X_final,X,dt, "RK4"))
 
