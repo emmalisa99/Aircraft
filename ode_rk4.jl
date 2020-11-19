@@ -25,7 +25,7 @@ end
 
 function RK4(t::Float64,T::Float64,dt::Float64,X,U0,f)
     nb_iter = Int(T/dt)
-    x_stockage = zeros(Float64, nb_iter, 4)
+    x_stockage = zeros(Float64, nb_iter+1, 4)
     iter = 1
     while t < T  
         t = t + dt 

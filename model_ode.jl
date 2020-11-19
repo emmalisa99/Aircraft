@@ -25,7 +25,7 @@ function f(X,Ut,t=0)
              2*(X[8]*X[10]-X[9]*X[7])  2*(X[9]*X[10]+X[8]*X[7])  2*(X[7]^2+X[10]^2)-1]
 
     v_body = inv(P_I2B) * X[4:6]
-    norm2_v_body = (v_body[1]^2 + v_body[2]^2 + v_body[3]^2) 
+    norm2_v_body = (v_body[1]^2 + v_body[2]^2 + v_body[3]^2 + 0.01) 
     norminf_v_body = max(v_body[1], v_body[2], v_body[3])
 
     # alpha = asin(-X[6]/norminf_v_body) #
@@ -43,7 +43,7 @@ function f(X,Ut,t=0)
     C_D = aircraft_cst.C_D0  + aircraft_cst.C_D_alpha2 * alpha^2
     C_C = aircraft_cst.C_C_beta * beta
     C_L = aircraft_cst.C_L_alpha * alpha
-    Cst_DCL = SA[-C_D ; -C_C ; C_L ] 
+    Cst_DCL = SA[-C_D ; -C_C ; C_L] 
     eta_a = rho(X[3], pressure, physical_data.r,physical_data.T) * aircraft_cst.Sw * 0.5
     norm2_speed = (X[4]^2+X[5]^2+X[6]^2)
     Fa = eta_a * norm2_speed * P_I2B * P_B2W * Cst_DCL  # aerodynamical forces
