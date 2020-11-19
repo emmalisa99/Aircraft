@@ -27,7 +27,7 @@ function RK4(t::Float64,T::Float64,dt::Float64,X,U0,f)
     nb_iter = Int(T/dt)
     x_stockage = []
     iter = 1
-    while t < T  && X[11] > aircraft.dry_mass
+    while t < T  
         t = t + dt 
         X = iter_RK4(X,U0,dt,f)
         push!(x_stockage, SA[X[1],X[2], X[3], X[11]])
