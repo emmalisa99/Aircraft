@@ -19,18 +19,19 @@ function test_RK4()
     println("X = ", solution)
 end
 
-function U_t(t)
+function U_t(t,m)
     return SA[100,0,0,0]
 end
 
 function RK4(t::Float64,T::Float64,dt::Float64,X,U0,f)
-    nb_iter = Int(T/dt)
-    x_stockage = []
+    nb_iter = Int(floor(T/dt))+1
+    x_stockage = zeros(Float64,nb_iter,4)
+    x_stockage[1,:] = SA[X[1],X[2],X[3],X[11]]
     iter = 1
     while t < T  
         t = t + dt 
         X = iter_RK4(X,U0,dt,f)
-        push!(x_stockage, SA[X[1],X[2], X[3], X[11]])
+        x_stockage[iter,:] =  SA[X[1],X[2],X[3],X[11]]
         iter += 1
     end
     return x_stockage # pos_x, pos_y, pos_z, m
