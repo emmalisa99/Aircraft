@@ -13,18 +13,18 @@ aircraft_cst = MiniBee_cst(aircraft)
 ####            Version with julia solver            ####
 #########################################################
 f_ode = ODEFunction(f) # y a t il d'autres truc à mettre ? 
-X_0 = SA[0,0,0,1,1,1,0,0,0,0,300]
-function Ut(t)
-    return [100,0,0,0]
-end
-Tmax = 5
-t_span = (0,Tmax) 
+# X_0 = SA[0,0,0,1,1,1,0,0,0,0,300]
+# function Ut(t)
+#     return [0,100,100,100]
+# end
+# Tmax = 5
+# t_span = (0,Tmax) 
 
-println("Time Julia Solver : ")
-@time begin
-    problem_ode = ODEProblem(f_ode,X_0,t_span,Ut)
-    sol = solve(problem_ode)
-end
+# println("Time Julia Solver : ")
+# @time begin
+#     problem_ode = ODEProblem(f_ode,X_0,t_span,Ut)
+#     sol = solve(problem_ode)
+# end
 
 # x_end_fake = SA[0.85, 0, 0.25]
 # println("Score function : ", J(sol,x_end_fake,X_0,Tmax,"Julia_sover"))
@@ -58,21 +58,21 @@ end
 ####                Version with RK4                 ####
 #########################################################
 
-# function U_t(t)
-#     return SA[100,0,0,0]
-# end
+function U_t(t)
+    return SA[250,100,100,100]
+end
 
-# # initialisation
-# X = SA[0,0,0,1,1,1,0,0,0,0,300]
-# U0 = U_t
-# # parameters of rk4
-# t = 0.
-# T = 5.
-# dt = 0.1
+# initialisation
+X = SA[0,0,0,1,1,1,0,0,0,0,300]
+U0 = U_t
+# parameters of rk4
+t = 0.
+T = 5.
+dt = 0.1
 
-# #resolution
-# println("Temps RK4 : ")
-# @time x_stockage = RK4(t,T,dt,X,U0,f)
+#resolution
+println("Temps RK4 : ")
+@time x_stockage = RK4(t,T,dt,X,U0,f)
 
 # println("Solution : ", x_stockage)
 

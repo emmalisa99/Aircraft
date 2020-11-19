@@ -25,13 +25,12 @@ end
 
 function RK4(t::Float64,T::Float64,dt::Float64,X,U0,f)
     nb_iter = Int(T/dt)
-    x_stockage = zeros(Float64, nb_iter+1, 4)
+    x_stockage = []
     iter = 1
-    while t < T  
+    while t < T  && X[11] > aircraft.dry_mass
         t = t + dt 
         X = iter_RK4(X,U0,dt,f)
-        x_stockage[iter,1:3] = X[1:3] 
-        x_stockage[iter,4] = X[11]
+        push!(x_stockage, SA[X[1],X[2], X[3], X[11]])
         iter += 1
     end
     return x_stockage # pos_x, pos_y, pos_z, m
@@ -41,7 +40,7 @@ function test()
     # initialisation
     X = SA[0,0,0,1,0,0,0,15,0,0,300]
     U = U_t#SA[100,0,0,0]
-    # parameters of rk4
+    # parameters of rk4µ
     t = 0.
     T = 0.2
     dt = 0.01

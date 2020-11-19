@@ -18,7 +18,7 @@ struct avion
     width::Float64
     thickness::Float64
 
-    avion(dry_mass = 500., kt=1., max_thrust=1e3, max_amplitude_angular_control=10., length=4., width=1.5, thickness=0.7) = new(dry_mass , kt, max_thrust, max_amplitude_angular_control, length, width, thickness)
+    avion(dry_mass = 200., kt=1., max_thrust=1e3, max_amplitude_angular_control=10., length=4., width=1.5, thickness=0.7) = new(dry_mass , kt, max_thrust, max_amplitude_angular_control, length, width, thickness)
 end
 
  
