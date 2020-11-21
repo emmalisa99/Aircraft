@@ -14,15 +14,15 @@ aircraft = avion()
 aircraft_cst = MiniBee_cst(aircraft)
 
 # for resolution
-X0 = SA[0,0,0,1,1,1,0,0,0,0,3000]
+X0 = SA[0,0,0,1,1,1,0,0.6,0.6,-0.6,130000]
 
-Tmax = 1.
+Tmax = 2.
 T0 = 0.
 dt = 0.01
 
 # for visualisation
-plot_3D = true
-plot_coord = true
+plot_3D = false
+plot_coord = false
 
 plot_3D_rk4 = true
 plot_coord_rk4 = true
@@ -31,12 +31,18 @@ plot_coord_rk4 = true
 x_end_fake = SA[0.85, 0, 0.25]
 
 # useful Functions 
-function Ut(t,m)
-    if m > aircraft.dry_mass 
-        return SA[250,100,100,100]
+function Ut(t,X)
+    if X[3] < 25 || X[6] <0
+        U = SA[70000,0,0,0]
     else 
-        return SA[0,100,100,100]
+        println("Gaz coupé")
+        U = SA[0,-20,-20,-20]
     end
+
+    if X[11] <= aircraft.dry_mass 
+        U[1] = 0
+    end
+    return U
 end
 
 function plot_traj_3d(trajectory)
@@ -91,27 +97,27 @@ end
 #########################################################
 
 f_ode = ODEFunction(f)
-t_span = (T0,Tmax) 
+# t_span = (T0,Tmax) 
 
-println("Time Julia Solver : ")
-@time begin
-    problem_ode = ODEProblem(f_ode,X0,t_span,Ut)
-    sol = solve(problem_ode)
-end
-
-
-println("Score function : ", J(sol,x_end_fake,X0,Tmax,"Julia_sover"))
-trajectory = sol[1:3,:]
-println(size(sol))
+# println("Time Julia Solver : ")
+# @time begin
+#     problem_ode = ODEProblem(f_ode,X0,t_span,Ut)
+#     sol = solve(problem_ode)
+# end
 
 
-if plot_3D
-    plot_traj_3d(trajectory)
-end
+# println("Score function : ", J(sol,x_end_fake,X0,Tmax,"Julia_sover"))
+# trajectory = sol[1:3,:]
+# println(size(sol))
 
-if plot_coord
-    plot_traj_3dcoords(sol.t,trajectory) 
-end 
+
+# if plot_3D
+#     plot_traj_3d(trajectory)
+# end
+
+# if plot_coord
+#     plot_traj_3dcoords(sol.t,trajectory) 
+# end 
 ########################################################
 ###                Version with RK4                 ####
 ########################################################

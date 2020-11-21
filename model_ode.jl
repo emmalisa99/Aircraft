@@ -9,7 +9,7 @@ function f(X,Ut,t=0)
        U = [U1,  U2,U3,U4] : thrust and others forces for the rotation
     """
 
-    U = Ut(t,X[11])
+    U = Ut(t,X)
 
     i =  SA[2*(X[7]^2+X[8]^2)-1 , 
             2*(X[8]*X[9]+X[7]*X[10]) ,

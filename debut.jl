@@ -18,7 +18,7 @@ struct avion
     width::Float64
     thickness::Float64
 
-    avion(dry_mass = 200., kt=1., max_thrust=1e3, max_amplitude_angular_control=10., length=4., width=1.5, thickness=0.7) = new(dry_mass , kt, max_thrust, max_amplitude_angular_control, length, width, thickness)
+    avion(dry_mass = 70616., kt=1., max_thrust=1e3, max_amplitude_angular_control=10., length=4., width=1.5, thickness=0.7) = new(dry_mass , kt, max_thrust, max_amplitude_angular_control, length, width, thickness)
 end
 
  
@@ -39,7 +39,7 @@ mutable struct MiniBee_cst
     e_os::Float64
     C_C_beta::Float64
 
-    function MiniBee_cst(aircraft::avion,Cl= 0.15, Cd=0.05, Ct=1., Sw=0.63, AR=nothing, C_D_alpha2=nothing, Sf=15., C_L_alpha=10, C_D0=0.0095, e_os=0.7, C_C_beta=-2.0) 
+    function MiniBee_cst(aircraft::avion,Cl= 0.15, Cd=0.05, Ct=1., Sw=1018.1383, AR=nothing, C_D_alpha2=nothing, Sf=15., C_L_alpha=10, C_D0=0.0095, e_os=0.7, C_C_beta=-2.0) 
         set_cst = new(Cl, Cd, Ct, Sw, AR, C_D_alpha2, Sf, C_L_alpha, C_D0, e_os, C_C_beta)
         set_cst.AR = aircraft.width/Sw
         set_cst.C_D_alpha2 = C_L_alpha^2/(pi*e_os*set_cst.AR)
