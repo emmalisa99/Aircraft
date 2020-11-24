@@ -35,8 +35,7 @@ function Ut(t,X)
     if X[3] < 25 || X[6] <0
         U = SA[70000,0,0,0]
     else 
-        println("Gaz coupé")
-        U = SA[0,-20,-20,-20]
+        U = SA[0,0,0,0]
     end
 
     if X[11] <= aircraft.dry_mass 
