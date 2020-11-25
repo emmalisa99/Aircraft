@@ -5,7 +5,7 @@ struct physic_cst
     g::SVector{3, Float64}      #Gravity vector
     r::Float64  #Air perfect gas specific constant 
     T::Float64  #Temperature
-    physic_cst(g = SA[0,0,9.81], r = 287., T = 288.15) = new(g,r,T)
+    physic_cst(g = SA[0,0,-9.81], r = 287., T = 288.15) = new(g,r,T)
 end
 
 
@@ -24,7 +24,7 @@ end
  
 
 #To improve : add C_D_alpha2 and AR (problems with connections between structures)
-mutable struct MiniBee_cst 
+mutable struct MiniBee_cst#{T} => C. mettre T à la place de Float64
     Cl::Float64     #Lift coefficient
     Cd::Float64     #Drag coefficient 
     Ct::Float64     
@@ -39,7 +39,7 @@ mutable struct MiniBee_cst
     e_os::Float64
     C_C_beta::Float64
 
-    function MiniBee_cst(aircraft::avion,Cl= 0.15, Cd=0.05, Ct=1., Sw=1018.1383, AR=nothing, C_D_alpha2=nothing, Sf=15., C_L_alpha=10, C_D0=0.0095, e_os=0.7, C_C_beta=-2.0) 
+    function MiniBee_cst(aircraft::avion,Cl= 1., Cd=0.007, Ct=1., Sw=1018.1383, AR=nothing, C_D_alpha2=nothing, Sf=15., C_L_alpha=10, C_D0=0.0095, e_os=0.7, C_C_beta=-2.0) 
         set_cst = new(Cl, Cd, Ct, Sw, AR, C_D_alpha2, Sf, C_L_alpha, C_D0, e_os, C_C_beta)
         set_cst.AR = aircraft.width/Sw
         set_cst.C_D_alpha2 = C_L_alpha^2/(pi*e_os*set_cst.AR)

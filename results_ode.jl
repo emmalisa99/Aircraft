@@ -35,8 +35,7 @@ function Ut(t,X)
     if X[3] < 25 || X[6] <0
         U = SA[70000,0,0,0]
     else 
-        println("Gaz coupé")
-        U = SA[0,-20,-20,-20]
+        U = SA[0,0,0,0]
     end
 
     if X[11] <= aircraft.dry_mass 
@@ -97,27 +96,29 @@ end
 #########################################################
 
 f_ode = ODEFunction(f)
-# t_span = (T0,Tmax) 
+t_span = (T0,Tmax) 
 
-# println("Time Julia Solver : ")
-# @time begin
-#     problem_ode = ODEProblem(f_ode,X0,t_span,Ut)
-#     sol = solve(problem_ode)
-# end
+println("Time Julia Solver : ")
+@time begin
+    problem_ode = ODEProblem(f_ode,X0,t_span,Ut)
+    sol = solve(problem_ode)
+end
+
+"""ODE Problem : inclure un dx comme un array pré-allouer dans lequel on met nos résultats 
+(vecteur de résultats) / le solveur gère tout seul l'allocation des temps intermédiaires """ 
+
+println("Score function : ", J(sol,x_end_fake,X0,Tmax,"Julia_sover"))
+trajectory = sol[1:3,:]
+println(size(sol))
 
 
-# println("Score function : ", J(sol,x_end_fake,X0,Tmax,"Julia_sover"))
-# trajectory = sol[1:3,:]
-# println(size(sol))
+if plot_3D
+    plot_traj_3d(trajectory)
+end
 
-
-# if plot_3D
-#     plot_traj_3d(trajectory)
-# end
-
-# if plot_coord
-#     plot_traj_3dcoords(sol.t,trajectory) 
-# end 
+if plot_coord
+    plot_traj_3dcoords(sol.t,trajectory) 
+end 
 ########################################################
 ###                Version with RK4                 ####
 ########################################################
