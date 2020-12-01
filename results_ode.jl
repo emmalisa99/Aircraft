@@ -3,6 +3,7 @@ using Plots
 include("model_ode.jl")
 include("ode_rk4.jl")
 include("score_function.jl")
+include("angles.jl")
 
 ############
 # Parameters 
@@ -14,18 +15,20 @@ aircraft = avion()
 aircraft_cst = MiniBee_cst(aircraft)
 
 # for resolution
-X0 = SA[0,0,0,1,1,1,0,0.6,0.6,-0.6,130000]
+w,x,y,z = angle2quaternion(0,[0,1,0])
+v0x,v0y,v0z = 100,0,100
+X0 = SA[0,0,0,v0x,v0y,v0z,w,x,y,z,130000]
 
-Tmax = 2.
+Tmax = 10.
 T0 = 0.
 dt = 0.01
 
 # for visualisation
-plot_3D = false
-plot_coord = false
+plot_3D = true
+plot_coord = true
 
-plot_3D_rk4 = true
-plot_coord_rk4 = true
+plot_3D_rk4 = false
+plot_coord_rk4 = false
 
 # for assessment
 x_end_fake = SA[0.85, 0, 0.25]
@@ -33,10 +36,11 @@ x_end_fake = SA[0.85, 0, 0.25]
 # useful Functions 
 function Ut(t,X)
     if X[3] < 25 || X[6] <0
-        U = SA[70000,0,0,0]
+        U = SA[1000,0,0,0]
     else 
         U = SA[0,0,0,0]
     end
+
 
     if X[11] <= aircraft.dry_mass 
         U[1] = 0
@@ -111,6 +115,7 @@ println("Score function : ", J(sol,x_end_fake,X0,Tmax,"Julia_sover"))
 trajectory = sol[1:3,:]
 println(size(sol))
 
+println(trajectory[3,:])
 
 if plot_3D
     plot_traj_3d(trajectory)
@@ -119,26 +124,28 @@ end
 if plot_coord
     plot_traj_3dcoords(sol.t,trajectory) 
 end 
+
+
 ########################################################
 ###                Version with RK4                 ####
 ########################################################
 
-U0 = Ut
+# U0 = Ut
 
-println("Temps RK4 : ")
-@time x_stockage = RK4(T0,Tmax,dt,X0,U0,f)
+# println("Temps RK4 : ")
+# @time x_stockage = RK4(T0,Tmax,dt,X0,U0,f)
 
-println(typeof(x_stockage),size(x_stockage))
-println("Solution : ", x_stockage)
+# println(typeof(x_stockage),size(x_stockage))
+# println("Solution : ", x_stockage)
 
-println("Score function : ", J(x_stockage,x_end_fake,X,dt, "RK4"))
+# println("Score function : ", J(x_stockage,x_end_fake,X,dt, "RK4"))
 
-println(size(x_stockage))
-if plot_3D_rk4
-    plot_traj_3d(x_stockage)
-end
+# println(size(x_stockage))
+# if plot_3D_rk4
+#     plot_traj_3d(x_stockage)
+# end
 
-if plot_coord_rk4
-    t = collect(0:1:1*size(x_stockage)[1]-1)*dt
-    plot_traj_3dcoords_rk4(t,x_stockage)
-end
+# if plot_coord_rk4
+#     t = collect(0:1:1*size(x_stockage)[1]-1)*dt
+#     plot_traj_3dcoords_rk4(t,x_stockage)
+# end
