@@ -1,27 +1,16 @@
 using DifferentialEquations
 using Plots
+using BenchmarkTools
 include("model_ode.jl")
 include("ode_rk4.jl")
-include("score_function.jl")
 include("angles.jl")
+include("values.jl")
 
 ############
-# Parameters 
+# Parameters
 ############
 
-# Constants of the aircraft
-physical_data = physic_cst()
-aircraft = avion()
-aircraft_cst = MiniBee_cst(aircraft)
 
-# for resolution
-w,x,y,z = angle2quaternion(0,[0,1,0])
-v0x,v0y,v0z = 100,0,100
-X0 = SA[0,0,0,v0x,v0y,v0z,w,x,y,z,130000]
-
-Tmax = 10.
-T0 = 0.
-dt = 0.01
 
 # for visualisation
 plot_3D = true
@@ -31,18 +20,18 @@ plot_3D_rk4 = false
 plot_coord_rk4 = false
 
 # for assessment
-x_end_fake = SA[0.85, 0, 0.25]
+x_end_fake = @SVector [0.85, 0, 0.25]
 
-# useful Functions 
+# useful Functions
 function Ut(t,X)
     if X[3] < 25 || X[6] <0
-        U = SA[1000,0,0,0]
-    else 
-        U = SA[0,0,0,0]
+        U = @SArray [70000,0,0,0]
+    else
+        U = @SArray [0,0,0,0]
     end
 
 
-    if X[11] <= aircraft.dry_mass 
+    if X[11] <= aircraft.dry_mass
         U[1] = 0
     end
     return U
@@ -50,8 +39,8 @@ end
 
 function plot_traj_3d(trajectory)
     """
-    Do : Plot the three coordinates 
-    Input : 
+    Do : Plot the three coordinates
+    Input :
         - t : time (N)
         - trajectory [4,N], trajectory on x,y,z and the mass on N steps.
     """
@@ -68,8 +57,8 @@ end
 
 function plot_traj_3dcoords(t,position)
     """
-    Do : Plot the three coordinates 
-    Input : 
+    Do : Plot the three coordinates
+    Input :
         - t : time (N)
         - position [4,N], trajectory on x,y,z and the mass on N steps.
     """
@@ -77,12 +66,12 @@ function plot_traj_3dcoords(t,position)
     plot!(t,position[2,:])
     plot!(t,position[3,:])
     @show plt_coord
-end 
+end
 
 function plot_traj_3dcoords_rk4(t,position)
     """
-    Do : Plot the three coordinates 
-    Input : 
+    Do : Plot the three coordinates
+    Input :
         - t : time (N)
         - position [4,N], trajectory on x,y,z and the mass on N steps.
     """
@@ -90,61 +79,67 @@ function plot_traj_3dcoords_rk4(t,position)
     plot!(t,position[:,2])
     plot!(t,position[:,3])
     @show plt_coord
-end 
-
-
-
+end
 
 #########################################################
 ####            Version with julia solver            ####
 #########################################################
 
-f_ode = ODEFunction(f)
-t_span = (T0,Tmax) 
 
-println("Time Julia Solver : ")
-@time begin
-    problem_ode = ODEProblem(f_ode,X0,t_span,Ut)
-    sol = solve(problem_ode)
+"""ODE Problem : inclure un dx comme un array pré-allouer dans lequel on met nos résultats
+(vecteur de résultats) / le solveur gère tout seul l'allocation des temps intermédiaires """
+
+# println("Score function : ", J(sol,x_end_fake,X0,Tmax,"Julia_sover"))
+# trajectory = sol[1:3,:]
+# println(size(sol))
+
+function solve_problem(Tmax, p)
+    t_span = (0.,Tmax)
+    # println("Time Julia Solver : ")
+    problem_ode = ODEProblem(f,[X0...],t_span,p)
+    solve(problem_ode)
 end
 
-"""ODE Problem : inclure un dx comme un array pré-allouer dans lequel on met nos résultats 
-(vecteur de résultats) / le solveur gère tout seul l'allocation des temps intermédiaires """ 
+const p = (physical_data, aircraft, Ut)
+dX = similar(X0)
 
-println("Score function : ", J(sol,x_end_fake,X0,Tmax,"Julia_sover"))
-trajectory = sol[1:3,:]
-println(size(sol))
+@info "Benchmarking"
+@info "Derivative"
+println(@benchmark f($dX, $X0, $p, 1.0))
+@info "ODE solve"
+println(@benchmark solve_problem($Tmax, $p))
 
-println(trajectory[3,:])
+sol = solve_problem(Tmax, p)
+trajectory = hcat((sol.(0:0.01:2))...)
 
 if plot_3D
     plot_traj_3d(trajectory)
 end
 
 if plot_coord
-    plot_traj_3dcoords(sol.t,trajectory) 
-end 
+    plot_traj_3dcoords(sol.t,trajectory)
+end
 
 
 ########################################################
 ###                Version with RK4                 ####
 ########################################################
 
-# U0 = Ut
+U0 = Ut
 
 # println("Temps RK4 : ")
 # @time x_stockage = RK4(T0,Tmax,dt,X0,U0,f)
-
+#
 # println(typeof(x_stockage),size(x_stockage))
 # println("Solution : ", x_stockage)
-
+#
 # println("Score function : ", J(x_stockage,x_end_fake,X,dt, "RK4"))
 
 # println(size(x_stockage))
 # if plot_3D_rk4
 #     plot_traj_3d(x_stockage)
 # end
-
+#
 # if plot_coord_rk4
 #     t = collect(0:1:1*size(x_stockage)[1]-1)*dt
 #     plot_traj_3dcoords_rk4(t,x_stockage)
