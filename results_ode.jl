@@ -10,22 +10,22 @@ include("values.jl")
 # Parameters
 ############
 
+# for visualisation and test
+test_benchmark = false
 
-
-# for visualisation
 plot_3D = true
 plot_coord = true
 
-plot_3D_rk4 = false
-plot_coord_rk4 = false
+plot_3D_rk4 = true
+plot_coord_rk4 = true
 
 # for assessment
 x_end_fake = @SVector [0.85, 0, 0.25]
 
 # useful Functions
 function Ut(t,X)
-    if X[3] < 25 || X[6] <0
-        U = @SArray [70000,0,0,0]
+    if X[3] < 500# || X[6] <0
+        U = @SArray [7000,0,0,0]
     else
         U = @SArray [0,0,0,0]
     end
@@ -96,21 +96,23 @@ end
 function solve_problem(Tmax, p)
     t_span = (0.,Tmax)
     # println("Time Julia Solver : ")
-    problem_ode = ODEProblem(f,[X0...],t_span,p)
+    problem_ode = ODEProblem(f,[X0...],t_span,p,dtmax=0.1)
     solve(problem_ode)
 end
 
 const p = (physical_data, aircraft, Ut)
 dX = similar(X0)
 
-@info "Benchmarking"
-@info "Derivative"
-println(@benchmark f($dX, $X0, $p, 1.0))
-@info "ODE solve"
-println(@benchmark solve_problem($Tmax, $p))
+if test_benchmark
+    @info "Benchmarking"
+    @info "Derivative"
+    println(@benchmark f($dX, $X0, $p, 1.0))
+    @info "ODE solve"
+    println(@benchmark solve_problem($Tmax, $p))
+end
 
 sol = solve_problem(Tmax, p)
-trajectory = hcat((sol.(0:0.01:2))...)
+trajectory = hcat(sol.u...)#   hcat((sol.(0:0.01:2))...)
 
 if plot_3D
     plot_traj_3d(trajectory)
@@ -127,18 +129,18 @@ end
 
 U0 = Ut
 
-# println("Temps RK4 : ")
-# @time x_stockage = RK4(T0,Tmax,dt,X0,U0,f)
-#
-# println(typeof(x_stockage),size(x_stockage))
+println("Temps RK4 : ")
+@time x_stockage = RK4(T0,Tmax,dt,dX,X0,p,f)
+
+println(typeof(x_stockage),size(x_stockage))
 # println("Solution : ", x_stockage)
-#
+
 # println("Score function : ", J(x_stockage,x_end_fake,X,dt, "RK4"))
 
-# println(size(x_stockage))
-# if plot_3D_rk4
-#     plot_traj_3d(x_stockage)
-# end
+println(size(x_stockage))
+if plot_3D_rk4
+    plot_traj_3d(x_stockage')
+end
 #
 # if plot_coord_rk4
 #     t = collect(0:1:1*size(x_stockage)[1]-1)*dt
