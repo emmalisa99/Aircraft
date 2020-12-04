@@ -23,14 +23,14 @@ function f(dX,X,p,t=0)
 
     Si on fait des variables globales plus tard => penser à mettre const devant"""
 
-    @views P_I2B = @MArray([2*(X[7]^2+X[8]^2)-1       2*(X[8]*X[9]-X[7]*X[10])  2*(X[8]*X[10]+X[9]*X[7]);
+    @views P_I2B = @SArray([2*(X[7]^2+X[8]^2)-1       2*(X[8]*X[9]-X[7]*X[10])  2*(X[8]*X[10]+X[9]*X[7]);
     2*(X[8]*X[9]+X[7]*X[10])  2*(X[7]^2+X[9]^2)-1       2*(X[9]*X[10]-X[8]*X[7]);
     2*(X[8]*X[10]-X[9]*X[7])  2*(X[9]*X[10]+X[8]*X[7])  2*(X[7]^2+X[10]^2)-1]
     )
 
     @views i = P_I2B[:,1]
 
-    @views M = @MArray([0 -U[2] -U[3] -U[4] ;
+    @views M = @SArray([0 -U[2] -U[3] -U[4] ;
                         U[2] 0 U[4] -U[3] ;
                         U[3] -U[4] 0 U[2] ;
                         U[4] U[3] -U[2] 0] )        # matrix for quaternion
@@ -46,7 +46,7 @@ function f(dX,X,p,t=0)
     cb = cos(beta)
     sa = sin(alpha)
     sb = cos(beta)
-    @views P_B2W = @MArray([ ca*cb -ca*sb -sa;
+    @views P_B2W = @SArray([ ca*cb -ca*sb -sa;
                     sb cb 0;
                     sa*cb -sa*sb ca])                            # "passage" matrix to wind coordinate to aircraft coordinate
     C_D = aircraft_cst.C_D0  + aircraft_cst.C_D_alpha2 * alpha^2

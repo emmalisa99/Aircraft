@@ -105,9 +105,11 @@ dX = similar(X0)
 
 @info "Benchmarking"
 @info "Derivative"
-println(@benchmark f($dX, $X0, $p, 1.0))
+display(@benchmark f($dX, $X0, $p, 1.0))
+println()
 @info "ODE solve"
-println(@benchmark solve_problem($Tmax, $p))
+display(@benchmark solve_problem($Tmax, $p))
+println()
 
 sol = solve_problem(Tmax, p)
 trajectory = hcat((sol.(0:0.01:2))...)
