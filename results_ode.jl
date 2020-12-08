@@ -1,6 +1,7 @@
 using DifferentialEquations
 using Plots
 using BenchmarkTools
+include("debut.jl")
 include("model_ode.jl")
 include("ode_rk4.jl")
 include("angles.jl")
@@ -14,22 +15,24 @@ include("values.jl")
 test_benchmark = false
 
 plot_3D = true
+option_forces = true
 plot_coord = true
 
-plot_3D_rk4 = true
-plot_coord_rk4 = true
+
+plot_3D_rk4 = false
+option_forces_rk4 = false
+plot_coord_rk4 = false
 
 # for assessment
 x_end_fake = @SVector [0.85, 0, 0.25]
 
 # useful Functions
 function Ut(t,X)
-    if X[3] < 500# || X[6] <0
-        U = @SArray [7000,0,0,0]
+    if X[3] < 50# || X[6] <0
+        U = @MArray [50,0,0,0]
     else
-        U = @SArray [0,0,0,0]
+        U = @MArray [0,0,0,0]
     end
-
 
     if X[11] <= aircraft.dry_mass
         U[1] = 0
@@ -52,7 +55,7 @@ function plot_traj_3d(trajectory)
     @gif for i=1:size(trajectory)[2]
         push!(plt,trajectory[1,i], trajectory[2,i], trajectory[3,i])
         end every 1
-    @show(plt)
+    return plt
 end
 
 function plot_traj_3dcoords(t,position)
@@ -65,7 +68,7 @@ function plot_traj_3dcoords(t,position)
     plt_coord = plot(t,position[1,:], title="Trajectory on the different axes")
     plot!(t,position[2,:])
     plot!(t,position[3,:])
-    @show plt_coord
+    return plt_coord
 end
 
 function plot_traj_3dcoords_rk4(t,position)
@@ -78,7 +81,7 @@ function plot_traj_3dcoords_rk4(t,position)
     plt_coord = plot(t,position[:,1], title="Trajectory on the different axes")
     plot!(t,position[:,2])
     plot!(t,position[:,3])
-    @show plt_coord
+    return plt_coord
 end
 
 #########################################################
@@ -115,11 +118,79 @@ sol = solve_problem(Tmax, p)
 trajectory = hcat(sol.u...)#   hcat((sol.(0:0.01:2))...)
 
 if plot_3D
-    plot_traj_3d(trajectory)
+    #plt = plot_traj_3d(trajectory)
+    plt = plot3d(
+        1,
+        title = "3D Trajectory",
+        marker = 2,
+    )
+    plt = plot3d(trajectory[1,:], trajectory[2,:], trajectory[3,:],label="traj")
+
+    if option_forces
+        n_inter = 10
+        d_inter = Int(floor(size(sol.t)[1]/n_inter))
+        for i in 1:n_inter
+            t = sol.t[i*d_inter]
+            force = forces(sol.u[i*d_inter],p,t)
+            pos = force.Position
+            lift = force.Lift/sol.u[i*d_inter][11]
+            drag = force.Drag/sol.u[i*d_inter][11]
+            poussee = force.Thrust/sol.u[i*d_inter][11]
+            plot3d!(plt, [pos[1],pos[1]+lift[1]],[pos[2],pos[2]+lift[2]],[pos[3],pos[3]+lift[3]],color="blue",label=nothing)
+            plot3d!(plt, [pos[1],pos[1]+drag[1]],[pos[2],pos[2]+drag[2]],[pos[3],pos[3]+drag[3]],color="red",label=nothing)
+            plot3d!(plt, [pos[1],pos[1]+poussee[1]],[pos[2],pos[2]+poussee[2]],[pos[3],pos[3]+poussee[3]],color="green",label=nothing)
+        end
+    end
+    @show plt
+    savefig("3d.png")
 end
 
+
 if plot_coord
-    plot_traj_3dcoords(sol.t,trajectory)
+    #plt = plot_traj_3dcoords(sol.t,trajectory)
+    
+    #Projection xy
+    plt_xy = plot(trajectory[1,:],trajectory[2,:],label="proj xy")
+
+    if option_forces
+        n_inter = 10
+        d_inter = Int(floor(size(sol.t)[1]/n_inter))
+        for i in 1:n_inter
+            t = sol.t[i*d_inter]
+            force = forces(sol.u[i*d_inter],p,t)
+            pos = force.Position
+            lift = force.Lift/sol.u[i*d_inter][11]
+            drag = force.Drag/sol.u[i*d_inter][11]
+            poussee = force.Thrust/sol.u[i*d_inter][11]
+            plot!(plt_xy, [pos[1],pos[1]+lift[1]],[pos[2],pos[2]+lift[2]],color="blue",label=nothing)
+            plot!(plt_xy, [pos[1],pos[1]+drag[1]],[pos[2],pos[2]+drag[2]],color="red",label=nothing)
+            plot!(plt_xy, [pos[1],pos[1]+poussee[1]],[pos[2],pos[2]+poussee[2]],color="green",label=nothing)
+        end
+    end
+    @show plt_xy
+    savefig("projxy.png")
+
+
+    #Projection xz
+    plt_xz = plot(trajectory[1,:],trajectory[3,:],label="proj xz")
+
+    if option_forces
+        n_inter = 10
+        d_inter = Int(floor(size(sol.t)[1]/n_inter))
+        for i in 1:n_inter
+            t = sol.t[i*d_inter]
+            force = forces(sol.u[i*d_inter],p,t)
+            pos = force.Position
+            lift = force.Lift/sol.u[i*d_inter][11]
+            drag = force.Drag/sol.u[i*d_inter][11]
+            poussee = force.Thrust/sol.u[i*d_inter][11]
+            plot!(plt_xz, [pos[1],pos[1]+lift[1]],[pos[3],pos[3]+lift[3]],color="blue",label=nothing)
+            plot!(plt_xz, [pos[1],pos[1]+drag[1]],[pos[3],pos[3]+drag[3]],color="red",label=nothing)
+            plot!(plt_xz, [pos[1],pos[1]+poussee[1]],[pos[3],pos[3]+poussee[3]],color="green",label=nothing)
+        end
+    end
+    @show plt_xz
+    savefig("projxz.png")
 end
 
 
@@ -127,20 +198,20 @@ end
 ###                Version with RK4                 ####
 ########################################################
 
-U0 = Ut
+# U0 = Ut
 
-println("Temps RK4 : ")
-@time x_stockage = RK4(T0,Tmax,dt,dX,X0,p,f)
+# println("Temps RK4 : ")
+# @time x_stockage = RK4(T0,Tmax,dt,dX,X0,p,f)
 
-println(typeof(x_stockage),size(x_stockage))
+# println(typeof(x_stockage),size(x_stockage))
 # println("Solution : ", x_stockage)
 
 # println("Score function : ", J(x_stockage,x_end_fake,X,dt, "RK4"))
 
-println(size(x_stockage))
-if plot_3D_rk4
-    plot_traj_3d(x_stockage')
-end
+# println(size(x_stockage))
+# if plot_3D_rk4
+#     plot_traj_3d(x_stockage')
+# end
 #
 # if plot_coord_rk4
 #     t = collect(0:1:1*size(x_stockage)[1]-1)*dt
