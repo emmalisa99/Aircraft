@@ -1,0 +1,13 @@
+
+    Amélioration Cedric : pour gagner du temps sur les matrices : passer en StaticArrays (utiliser le constructeurs + nombre d'élément ou macro : @SArray([ , ]) )
+    ce qu'on fait pour l'instant, on déclare une liste de StaticArrays
+
+    Gagner encore plus de temps : pré-allouer des vecteurs bidons avant la création de fonction, passer en argument de f(X,U), puis re-remplir ( i.= @SArray)
+    Dans ce cas là pas de possibilité de changer avec SArray donc utiliser MArray
+
+    On veut lire X[7] seulement, donc on peut utiliser des @view de chaque composante
+    Plus facile : @views i .= @SArray([ ])
+
+    Si on fait des variables globales plus tard => penser à mettre const devant
+
+ """ Cedric : changer noms de variables en q0, q1, .. ne change pas le temps de calcul """
