@@ -11,7 +11,7 @@ const aircraft_cst = MiniBee_cst(aircraft)
 #const X0 = @SVector [0,0,0,v0x,v0y,v0z,w,x,y,z,m]
 
 # for solver resolution 
-const Tmax = 50.
+const Tmax = 1.
 const T0 = 0.
 const dt = 0.01
 
@@ -29,7 +29,7 @@ g = physical_data.g
 S = aircraft_cst.Sw
 mass_vol = rho(X0[3], pressure, physical_data.r,physical_data.T)
 coeff_aero = get_coeff(c_lift,Angle) 
-
+C_L_0 = coeff_aero.Lift
 # v0x = sqrt(-2*m*g[3]/ (mass_vol * S * coeff_aero.Lift))
 # v0y = 0
 # v0z = 0
@@ -43,6 +43,7 @@ coeff_aero = get_coeff(c_lift,Angle)
 # end
 
 Angle_rad = Angle * pi / 180
+Angle_init_rad = Angle_rad
 v0x = sqrt( -2 * cos(Angle_rad) * m* g[3] / (mass_vol * S * coeff_aero.Lift) )
 v0y = 0
 v0z = 0

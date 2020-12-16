@@ -16,7 +16,7 @@ struct avion
     width::Float64
     thickness::Float64
     nb_passager::Int8
-    avion(dry_mass = 779., gross_mass=1111, kt=1., max_thrust=1e3, max_amplitude_angular_control=10., length=4., width=1.5, thickness=0.7,nb_passager=2) = new(dry_mass , gross_mass, kt, max_thrust, max_amplitude_angular_control, length, width, thickness, nb_passager)
+    avion(dry_mass = 779., gross_mass=1111, kt=0.0001, max_thrust=1e3, max_amplitude_angular_control=10., length=4., width=1.5, thickness=0.7,nb_passager=2) = new(dry_mass , gross_mass, kt, max_thrust, max_amplitude_angular_control, length, width, thickness, nb_passager)
 end
 
 
