@@ -58,10 +58,10 @@ function dm2AngleThrust(X)
     mass_vol = rho(X[3], pressure, physical_data.r,physical_data.T) 
     V2 = sum( X[4:6] .^2) 
     angle  = find_dm2angle(m)
-    println(dm2angle(angle,m))
+
     coeff_aero = get_coeff(c_lift,angle)
     thrust = 0.5 * mass_vol * V2 * coeff_aero.Drag * aircraft_cst.Sw - sin(angle*pi/180) * X[11] * physical_data.g[3]
-    println( 0.5 * mass_vol * V2 * coeff_aero.Drag * aircraft_cst.Sw - thrust - sin(angle*pi/180)*physical_data.g[3]*X[11])
+   
     return angle,thrust
 end
 
@@ -114,20 +114,18 @@ function f(dX,X,p,t=0)
         C_L = aircraft_cst.C_L_alpha * alpha
 
     else
-        # alpha = atan(v_body[3]/sqrt(v_body[1]^2+v_body[2]^2))
-        # alpha = Int(floor(alpha/2))*2
+        # sans vairation de masse
         assiette = 2 * asin(sqrt(X[8]^2+X[9]^2+X[10]^2)) * 180 / pi
-        #C_L,C_D = angle2coeff[assiette].Lift,angle2coeff[assiette].Drag 
         coeff_aero = get_coeff(c_lift,assiette)
         C_L = coeff_aero.Lift
         C_D = coeff_aero.Drag
 
+        # si vairation de masse
         assiette,U[1] = dm2AngleThrust(X)
         X[7:10] .= angle2quaternion(assiette,[0,1,0])
         coeff_aero = get_coeff(c_lift,assiette)
         C_L = coeff_aero.Lift
         C_D = coeff_aero.Drag
-        println(assiette)
     end    
     @views P_I2B = UnitQuaternion(X[7:10]...)
 
@@ -140,7 +138,7 @@ function f(dX,X,p,t=0)
 
     @views v_body = P_I2B * X[4:6]#transpose(X[4:6]) * transpose(P_I2B) # Peut faire uniquement la transposé car changement de base entre repères orthonormés
     norm2_v_body = sum(v_body .^ 2)
-    
+
     @views eta_a = rho(X[3], pressure, physical_data.r,physical_data.T) * aircraft_cst.Sw * 0.5
     @views norm2_speed = (X[4]^2+X[5]^2+X[6]^2)
     Flift = eta_a .* norm2_v_body .* transpose(P_I2B) *   @SArray [0.,0.,C_L]  # aerodynamical forces
