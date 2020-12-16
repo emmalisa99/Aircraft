@@ -19,7 +19,7 @@ function relation_assiette_speed_thrust(assiette,T)
     return -cos(assiette_rad) * poids * coeff_aero.Drag / coeff_aero.Lift - sin(assiette_rad) * poids + T
 end
 
-findroot(T) = fzero(assiette->relation_assiette_speed_thrust(assiette,T), 4)
+findroot(T) = fzero(assiette->relation_assiette_speed_thrust(assiette,T), 10)
 
 using Plots
 function test()
@@ -55,18 +55,18 @@ function f(dX,X,p,t=0)
        X = [x1,x2,x3,  v1,v2,v3,  q1,q2,q3,q4, m] : position, speed, quaternion, masse
        U = [U1,  U2,U3,U4] : thrust and others forces for the rotation
     """
+    println(X[1:3])
     physical_data, aircraft, Ut, last_thrust, speedIsachieved = p
     U = Ut(t,X)
     q = UnitQuaternion(X[7:10]...)
 
-    # if last_thrust != U[1]
-    #     # compute the objectives
-    #     obj_assiette = findroot(U[1])
-    #     obj_vitesse = sqrt(angle2vitesse(obj_assiette,X))
-    #     println("#########################", obj_vitesse)
-    #     # mise a jour de last_thrust
-    #     last_thrust == U[1]
-    # end
+    if last_thrust != U[1]
+        # compute the objectives
+        obj_assiette = findroot(U[1])
+        obj_vitesse = sqrt(angle2vitesse(obj_assiette,X))
+        # mise a jour de last_thrust
+        last_thrust == U[1]
+    end
 
     # if !(speedIsachieved)
     #     if norm(X[4:6]) -  obj_vitesse < 1e-1
@@ -88,7 +88,7 @@ function f(dX,X,p,t=0)
 
     @views v_body = P_I2B * X[4:6]#transpose(X[4:6]) * transpose(P_I2B) # Peut faire uniquement la transposé car changement de base entre repères orthonormés
     norm2_v_body = sum(v_body .^ 2)
- 
+    
     option = false
 
     if option
@@ -125,12 +125,13 @@ function f(dX,X,p,t=0)
     @views dX[7:10] .= Rotations.kinematics(q,U[2:4])# 1/2 .* M * X[7:10] ##1 # .*q en utilisant @views q = X[7:10] / pour 1/2 .* avec .= au début
     @views dX[11] = 0#-aircraft.kt * U[1]                        # dot m = -kt * trhust : variation of fuel
     
+    #println(norm2_v_body)
     # gomme les erreurs
-    for i=1:10
-        if isless(dX[i],1e-12) 
-            dX[i] = 0
-        end
-    end
+    # for i=1:10
+    #     if isless(dX[i],1e-12) 
+    #         dX[i] = 0
+    #     end
+    # end
 
     if t%1 < 0.001 
         println("Vitesse = ",X[4:6], "Dérivée = ", dX[4:6])
@@ -138,6 +139,8 @@ function f(dX,X,p,t=0)
 
     return dX
 end
+
+
 
 
 function forces(X,p,t)

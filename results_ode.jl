@@ -31,20 +31,24 @@ x_end_fake = @SVector [0.85, 0, 0.25]
 
 # useful Functions
 function Ut(t,X)
-    if true#t < 1
+    if t < 5
         U = @MArray [poussee(X[4:6]),0,0,0]
     else
-        U = @MArray [1500,0,0,0]
+        U = @MArray [1800,0,0,0]
     end
     # if (t < 1)#0.2) || (t > 0.5 && t < 0.7 )
     #     U = [0,0,0,2*pi]
     # end
 
+    X[2] = 10000
     if X[11] <= aircraft.dry_mass
         U[1] = 0
     end
+    obj_assiette = findroot(U[1])
+    X[7:10] .= angle2quaternion(obj_assiette,[0,1,0])
     return U
 end
+
 
 function plot_traj_3d(trajectory)
     """

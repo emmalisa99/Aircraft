@@ -11,7 +11,7 @@ const aircraft_cst = MiniBee_cst(aircraft)
 #const X0 = @SVector [0,0,0,v0x,v0y,v0z,w,x,y,z,m]
 
 # for solver resolution 
-const Tmax = 10.
+const Tmax = 50.
 const T0 = 0.
 const dt = 0.01
 
