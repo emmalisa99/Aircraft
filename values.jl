@@ -11,7 +11,7 @@ const aircraft_cst = MiniBee_cst(aircraft)
 #const X0 = @SVector [0,0,0,v0x,v0y,v0z,w,x,y,z,m]
 
 # for solver resolution 
-const Tmax = 2.
+const Tmax = 10.
 const T0 = 0.
 const dt = 0.01
 
@@ -53,6 +53,14 @@ X0[4:6] .= v0x,v0y,v0z
 X0[11] = m
 
 # give the good thrust to keep the aircraft on the same level
-function poussee()
-    return 0.5 * v0x^2 * S * mass_vol * coeff_aero.Drag - sin(Angle_rad) * m * g[3]
+function poussee(Speed_init = X[4:6], Angle_init = Angle_rad)
+    V = sum(Speed_init .^ 2)
+    return 0.5 * V * S * mass_vol * coeff_aero.Drag - sin(Angle_init) * m * g[3]
 end
+
+
+
+
+
+
+

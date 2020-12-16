@@ -31,8 +31,11 @@ x_end_fake = @SVector [0.85, 0, 0.25]
 
 # useful Functions
 function Ut(t,X)
-    U = @MArray [poussee(),0,0,0]
-    
+    if true#t < 1
+        U = @MArray [poussee(X[4:6]),0,0,0]
+    else
+        U = @MArray [1500,0,0,0]
+    end
     # if (t < 1)#0.2) || (t > 0.5 && t < 0.7 )
     #     U = [0,0,0,2*pi]
     # end
@@ -107,7 +110,9 @@ function solve_problem(Tmax, p)
 end
 
 if julia_solver 
-    const p = (physical_data, aircraft, Ut)
+    last_thrust = Ut(0,X0)[1]
+    speedIsachieved = true
+    p = (physical_data, aircraft, Ut, last_thrust, speedIsachieved)
     dX = similar(X0)
 
     if test_benchmark
@@ -227,3 +232,5 @@ if rk4_solver
         plot_traj_3dcoords_rk4(t,x_stockage)
     end
 end
+
+

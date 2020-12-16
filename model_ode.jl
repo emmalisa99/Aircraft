@@ -10,6 +10,43 @@ struct Forces
     Position::SArray{Tuple{3},Float64,1,3}
 end
 
+
+using Roots
+function relation_assiette_speed_thrust(assiette,T)
+    coeff_aero = get_coeff(c_lift,assiette) 
+    assiette_rad = assiette * pi / 180
+    poids = - g[3] * m
+    return -cos(assiette_rad) * poids * coeff_aero.Drag / coeff_aero.Lift - sin(assiette_rad) * poids + T
+end
+
+findroot(T) = fzero(assiette->relation_assiette_speed_thrust(assiette,T), 4)
+
+using Plots
+function test()
+    angle_voulu = 5.
+    X = zeros(Float64,11)
+    X[11] = 1111
+    v0x = sqrt(angle2vitesse(angle_voulu,X))
+    T = poussee([v0x,0,0], angle_voulu*pi/180)
+    assiettes = collect(-5.:10.)
+    y = zeros(Float64,size(assiettes)[1])
+    for i=1:size(assiettes)[1]
+        y[i] = relation_assiette_speed_thrust(assiettes[i],T)
+    end
+    println("Pour le premier résultat, on attend : 5°")
+    println("Si traction T = ", T, ", alors l'angle est : ",findroot(T))
+    println("Si traction T = 2800, alors l'angle est : ",findroot(2800))
+
+    plot(assiettes,y)
+end 
+
+function angle2vitesse(assiette,X)
+    coeff_aero = get_coeff(c_lift,assiette) 
+    assiette = assiette * pi/180
+    mass_vol = mass_vol = rho(X[3], pressure, physical_data.r,physical_data.T)
+    return -2 * cos(assiette) * X[11] * physical_data.g[3] /  (mass_vol * aircraft_cst.Sw * coeff_aero.Lift)
+end
+
 function f(dX,X,p,t=0)
     """
     dot X = f(X,U)
@@ -18,9 +55,24 @@ function f(dX,X,p,t=0)
        X = [x1,x2,x3,  v1,v2,v3,  q1,q2,q3,q4, m] : position, speed, quaternion, masse
        U = [U1,  U2,U3,U4] : thrust and others forces for the rotation
     """
-    physical_data, aircraft, Ut = p
+    physical_data, aircraft, Ut, last_thrust, speedIsachieved = p
     U = Ut(t,X)
     q = UnitQuaternion(X[7:10]...)
+
+    # if last_thrust != U[1]
+    #     # compute the objectives
+    #     obj_assiette = findroot(U[1])
+    #     obj_vitesse = sqrt(angle2vitesse(obj_assiette,X))
+    #     println("#########################", obj_vitesse)
+    #     # mise a jour de last_thrust
+    #     last_thrust == U[1]
+    # end
+
+    # if !(speedIsachieved)
+    #     if norm(X[4:6]) -  obj_vitesse < 1e-1
+    #         X[7:10] = angle2quaternion(5.,[0,1,0])
+    #     end
+    # end
 
     # @views P_I2B = @SArray([2*(X[7]^2+X[8]^2)-1       2*(X[8]*X[9]-X[7]*X[10])  2*(X[8]*X[10]+X[9]*X[7]);
     # 2*(X[8]*X[9]+X[7]*X[10])  2*(X[7]^2+X[9]^2)-1       2*(X[9]*X[10]-X[8]*X[7]);
@@ -69,7 +121,7 @@ function f(dX,X,p,t=0)
     Fdrag =  -eta_a .* norm2_v_body .* transpose(P_I2B)  * @SArray [C_D,0.,0.]
 
     @views dX[1:3] .= X[4:6]                                    # dot x = v
-    @. @views dX[4:6] =  (Flift + Fdrag)/X[11] + physical_data.g  + U[1]/X[11] * i #* (aircraft.kt*X[4:6] +
+    @. @views dX[4:6] =  (Flift + Fdrag)/X[11] + physical_data.g  + U[1]/X[11] *  i  #(aircraft.kt*X[4:6] +) 
     @views dX[7:10] .= Rotations.kinematics(q,U[2:4])# 1/2 .* M * X[7:10] ##1 # .*q en utilisant @views q = X[7:10] / pour 1/2 .* avec .= au début
     @views dX[11] = 0#-aircraft.kt * U[1]                        # dot m = -kt * trhust : variation of fuel
     

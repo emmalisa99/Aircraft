@@ -82,7 +82,6 @@ c_lift = coeffs(f_lift)
 # return the C_L according to the angle
 function get_coeff(c_lift,angle)
     lift = c_lift[2] * angle + c_lift[1]
-    lift = 0.55
     return Coeff(lift)
 end
 
