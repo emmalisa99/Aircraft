@@ -1,9 +1,11 @@
 using DifferentialEquations
 using Plots
 using BenchmarkTools
+using StaticArrays
 include("debut.jl")
 include("model_ode.jl")
 include("ode_rk4.jl")
+include("coefficients.jl")
 include("angles.jl")
 include("values.jl")
 
@@ -29,15 +31,11 @@ x_end_fake = @SVector [0.85, 0, 0.25]
 
 # useful Functions
 function Ut(t,X)
-    if X[3] < 5# || X[6] <0
-        U = @MArray [0,0,0,0]
-    else
-        U = @MArray [0,0,0,0]
-    end
-
-    if (t < 1)#0.2) || (t > 0.5 && t < 0.7 )
-        U = [0,0,0,2*pi]
-    end
+    U = @MArray [poussee(),0,0,0]
+    
+    # if (t < 1)#0.2) || (t > 0.5 && t < 0.7 )
+    #     U = [0,0,0,2*pi]
+    # end
 
     if X[11] <= aircraft.dry_mass
         U[1] = 0
@@ -140,7 +138,9 @@ if julia_solver
                 force = forces(sol.u[i*d_inter],p,t)
                 pos = force.Position
                 lift = force.Lift/sol.u[i*d_inter][11]
+                println(lift)
                 drag = force.Drag/sol.u[i*d_inter][11]
+                println(drag)
                 poussee = force.Thrust/sol.u[i*d_inter][11]
                 plot3d!(plt, [pos[1],pos[1]+lift[1]],[pos[2],pos[2]+lift[2]],[pos[3],pos[3]+lift[3]],color="blue",label=nothing)
                 plot3d!(plt, [pos[1],pos[1]+drag[1]],[pos[2],pos[2]+drag[2]],[pos[3],pos[3]+drag[3]],color="red",label=nothing)
