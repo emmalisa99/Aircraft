@@ -7,8 +7,8 @@ struct Coeff
 end
 
 function Coeff(lift)
-    C_D_min = 0.031 # 0.027 #
-    K = 0.054 #0.07 # 1/(pi*aircraft_cst.e_os*aircraft_cst.AR)   #
+    C_D_min =  0.027 #0.031 #
+    K = 0.07 # 1/(pi*aircraft_cst.e_os*aircraft_cst.AR)   # 0.054 #
     Lift = lift
     Drag = C_D_min + lift^2 * K
     Drag = 
@@ -82,6 +82,7 @@ c_lift = coeffs(f_lift)
 # return the C_L according to the angle
 function get_coeff(c_lift,angle)
     lift = c_lift[2] * angle + c_lift[1]
+    lift = 0.55
     return Coeff(lift)
 end
 

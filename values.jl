@@ -11,7 +11,7 @@ const aircraft_cst = MiniBee_cst(aircraft)
 #const X0 = @SVector [0,0,0,v0x,v0y,v0z,w,x,y,z,m]
 
 # for solver resolution 
-const Tmax = 10.
+const Tmax = 2.
 const T0 = 0.
 const dt = 0.01
 
@@ -20,7 +20,7 @@ X0 = zeros(Float64,11)
 position = [0,0,0]
 X0[1:3] = position
 
-const Angle = 5. #°  ## oritentation
+Angle = 5. #°  ## oritentation
 w,x,y,z = angle2quaternion(Angle,[0,1,0])
 X0[7:10] .= w,x,y,z
 
@@ -30,14 +30,29 @@ S = aircraft_cst.Sw
 mass_vol = rho(X0[3], pressure, physical_data.r,physical_data.T)
 coeff_aero = get_coeff(c_lift,Angle) 
 
-v0x = sqrt(-2*m*g[3]/ (mass_vol * S * coeff_aero.Lift))
+# v0x = sqrt(-2*m*g[3]/ (mass_vol * S * coeff_aero.Lift))
+# v0y = 0
+# v0z = 0
+# X0[4:6] .= v0x,v0y,v0z
+
+# X0[11] = m
+
+# # give the good thrust to keep the aircraft on the same level
+# function poussee()
+#     return 0.5 * v0x^2 * S * mass_vol * coeff_aero.Drag
+# end
+
+Angle_rad = Angle * pi / 180
+v0x = sqrt( -2 * cos(Angle_rad) * m* g[3] / (mass_vol * S * coeff_aero.Lift) )
 v0y = 0
 v0z = 0
 X0[4:6] .= v0x,v0y,v0z
+
+#print(  UnitQuaternion(w,x,y,z) * @SArray([v0x,v0y,v0z])])
 
 X0[11] = m
 
 # give the good thrust to keep the aircraft on the same level
 function poussee()
-    return 0.5 * v0x^2 * S * mass_vol * coeff_aero.Drag
+    return 0.5 * v0x^2 * S * mass_vol * coeff_aero.Drag - sin(Angle_rad) * m * g[3]
 end

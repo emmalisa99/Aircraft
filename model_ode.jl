@@ -22,20 +22,21 @@ function f(dX,X,p,t=0)
     U = Ut(t,X)
     q = UnitQuaternion(X[7:10]...)
 
-    @views P_I2B = @SArray([2*(X[7]^2+X[8]^2)-1       2*(X[8]*X[9]-X[7]*X[10])  2*(X[8]*X[10]+X[9]*X[7]);
-    2*(X[8]*X[9]+X[7]*X[10])  2*(X[7]^2+X[9]^2)-1       2*(X[9]*X[10]-X[8]*X[7]);
-    2*(X[8]*X[10]-X[9]*X[7])  2*(X[9]*X[10]+X[8]*X[7])  2*(X[7]^2+X[10]^2)-1])
+    # @views P_I2B = @SArray([2*(X[7]^2+X[8]^2)-1       2*(X[8]*X[9]-X[7]*X[10])  2*(X[8]*X[10]+X[9]*X[7]);
+    # 2*(X[8]*X[9]+X[7]*X[10])  2*(X[7]^2+X[9]^2)-1       2*(X[9]*X[10]-X[8]*X[7]);
+    # 2*(X[8]*X[10]-X[9]*X[7])  2*(X[9]*X[10]+X[8]*X[7])  2*(X[7]^2+X[10]^2)-1])
+    @views P_I2B = UnitQuaternion(X[7:10]...)
 
-    @views i = P_I2B[:,1]
+    @views i = P_I2B[1,:]
 
     @views M = @SArray([0 -U[2] -U[3] -U[4] ;
                         U[2] 0 U[4] -U[3] ;
                         U[3] -U[4] 0 U[2] ;
                         U[4] U[3] -U[2] 0] )        # matrix for quaternion
 
-    @views v_body = transpose(P_I2B) * X[4:6] # Peut faire uniquement la transposé car changement de base entre repères orthonormés
+    @views v_body = P_I2B * X[4:6]#transpose(X[4:6]) * transpose(P_I2B) # Peut faire uniquement la transposé car changement de base entre repères orthonormés
     norm2_v_body = sum(v_body .^ 2)
-
+ 
     option = false
 
     if option
@@ -64,14 +65,21 @@ function f(dX,X,p,t=0)
     
     @views eta_a = rho(X[3], pressure, physical_data.r,physical_data.T) * aircraft_cst.Sw * 0.5
     @views norm2_speed = (X[4]^2+X[5]^2+X[6]^2)
-    Flift = eta_a .* norm2_v_body .* P_I2B *   @SArray [0.,0.,C_L]  # aerodynamical forces
-    Fdrag =  -eta_a .* norm2_v_body .* P_I2B  * @SArray [C_D,0.,0.]
+    Flift = eta_a .* norm2_v_body .* transpose(P_I2B) *   @SArray [0.,0.,C_L]  # aerodynamical forces
+    Fdrag =  -eta_a .* norm2_v_body .* transpose(P_I2B)  * @SArray [C_D,0.,0.]
 
     @views dX[1:3] .= X[4:6]                                    # dot x = v
     @. @views dX[4:6] =  (Flift + Fdrag)/X[11] + physical_data.g  + U[1]/X[11] * i #* (aircraft.kt*X[4:6] +
     @views dX[7:10] .= Rotations.kinematics(q,U[2:4])# 1/2 .* M * X[7:10] ##1 # .*q en utilisant @views q = X[7:10] / pour 1/2 .* avec .= au début
     @views dX[11] = 0#-aircraft.kt * U[1]                        # dot m = -kt * trhust : variation of fuel
     
+    # gomme les erreurs
+    for i=1:10
+        if isless(dX[i],1e-12) 
+            dX[i] = 0
+        end
+    end
+
     if t%1 < 0.001 
         println("Vitesse = ",X[4:6], "Dérivée = ", dX[4:6])
     end
@@ -91,7 +99,10 @@ function forces(X,p,t)
 
     @views i = P_I2B[:,1]
 
-    @views v_body = transpose(P_I2B) * X[4:6] # Peut faire uniquement la transposé car changement de base entre repères orthonormés
+    P_I2B = UnitQuaternion(X[7:10]...)
+    @views i = P_I2B[:,1]
+
+    @views v_body = P_I2B * X[4:6] # Peut faire uniquement la transposé car changement de base entre repères orthonormés
     norm2_v_body = sum(v_body .^ 2)
                      
     assiette = 2 * asin(sqrt(X[8]^2+X[9]^2+X[10]^2)) * 180 / pi
