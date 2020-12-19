@@ -1,6 +1,28 @@
 using Plots
 using Roots
 
+
+##########################################
+## Pour savoir si on a un état d'équilibre
+##########################################
+function is_stable(X,thrust,aircraft_physical_data)
+    c_lift,aircraft,physical_data = aircraft_physical_data
+    
+    w,x,y,z = X[7:10]
+    assiette_rad = 2 * asin(sqrt(x^2+y^2+z^2)) 
+    assiette_deg = assiette_rad * 180 / pi
+    coeff_aero = get_coeff(c_lift,assiette_deg)
+
+    poids  = - X[11] * physical_data.g[3]
+    V2 =  sum(X[4:6].^2)  
+    etha_a = masse_volumique(X[3], pressure, physical_data.r,physical_data.T) * aircraft.Sw * 0.5
+
+    eq_horizontal = abs(etha_a * V2 * coeff_aero.Lift - cos(assiette_rad) * poids) < 1e-11
+    eq_vertical = abs(etha_a * V2 * coeff_aero.Drag - thrust + sin(assiette_rad) * poids) < 1e-11
+    return eq_horizontal && eq_vertical
+end
+
+
 ##################################################################################################
 ### Si l'équation des forces verticales est satisfaites, alors l'équation suivante doit être nulle
 ##################################################################################################

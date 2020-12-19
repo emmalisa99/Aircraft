@@ -18,15 +18,15 @@ include("initialisation.jl")
 # for visualisation and test
 test_benchmark = false
 
-julia_solver = true
-plot_3D = true
+julia_solver = false
+plot_3D = false
 option_forces = false
-plot_coord = true
+plot_coord = false
 
-rk4_solver = false
-plot_3D_rk4 = false
+rk4_solver = true
+plot_3D_rk4 = true
 option_forces_rk4 = false
-plot_coord_rk4 = false
+plot_coord_rk4 = true
 
 # for assessment
 x_end_fake = @SVector [0.85, 0, 0.25]
@@ -40,7 +40,8 @@ x_end_fake = @SVector [0.85, 0, 0.25]
 (vecteur de résultats) / le solveur gère tout seul l'allocation des temps intermédiaires """
 
 if julia_solver 
-    angle_function = find_angle_spline(1,Angle,angle_echelon,1)#find_angle_polynome(Angle,angle_echelon,1,5,2/3,0.01)
+    #angle_function = find_angle_spline(1,Angle,angle_echelon,1)#find_angle_polynome(Angle,angle_echelon,1,5,2/3,0.01)
+    angle_function = find_angle_spline(1,Angle,angle_echelon,1)#find_angle_polynome(Angle,angle_echelon,1,3,1/5,0.8)
     p = (aircraft_physical_data..., control, angle_function)
     dX = similar(X0)
 
@@ -76,25 +77,44 @@ end
 ########################################################
 
 if rk4_solver
-    U0 = control
+    angle_function = find_angle_polynome(Angle,angle_echelon,1,1.3,0.12,0.005)
+    p = (aircraft_physical_data..., control, angle_function)
+    dX = similar(X0)
 
     println("Temps RK4 : ")
     @time x_stockage = RK4(T0,Tmax,dt,dX,X0,p,f)
 
-    println(typeof(x_stockage),size(x_stockage))
-    println("Solution : ", x_stockage)
+    #println(typeof(x_stockage),size(x_stockage))
+    #println("Solution : ", x_stockage)
 
     #println("Score function : ", J(x_stockage,x_end_fake,X,dt, "RK4"))
 
-    println(size(x_stockage))
+    # println(size(x_stockage))
+    # if plot_3D_rk4
+    #     plot_traj_3d(x_stockage')
+    # end
+
+    # if plot_coord_rk4
+    #     t = collect(0:1:1*size(x_stockage)[1]-1)*dt
+    #     plot_traj_3dcoords_rk4(t,x_stockage)
+    # end
+
     if plot_3D_rk4
-        plot_traj_3d(x_stockage')
+        t = collect(0:dt:Tmax)
+        plot_3D_option_forces_rk4(x_stockage, t, p, option_forces)
     end
 
     if plot_coord_rk4
-        t = collect(0:1:1*size(x_stockage)[1]-1)*dt
-        plot_traj_3dcoords_rk4(t,x_stockage)
+        #plt = plot_traj_3dcoords(sol.t,trajectory)
+        t = collect(0:dt:Tmax)
+        #Projection xz
+        plot_trajectory_projection_rk4(x_stockage,t,p,"x","y",option_forces)
+
+        #Projection xz
+        plot_trajectory_projection_rk4(x_stockage,t,p,"x","z",option_forces)
     end
 end
 
-
+##### 
+## Obj : vitesse : [44.21407974371336,0,0] et angle = 5.112924169238338
+#####

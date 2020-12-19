@@ -8,7 +8,7 @@ const aircraft = avion()
 #######################
 # for solver resolution 
 #######################
-const Tmax = 3.
+const Tmax = 10.
 const T0 = 0.
 const dt = 0.01
 
@@ -64,9 +64,10 @@ poussee_echelon = 1.01 * poussee_init
 
 angle_echelon = find_angle(poussee_echelon, X0[11],aircraft_physical_data)
 
+
 function control(t,mass,dry_mass)
     U = @MArray [poussee_init,0,0,0]
-    if false#t >= 1
+    if t >= 1
         U = @MArray [poussee_echelon,0,0,0]
     end
     if mass <= dry_mass

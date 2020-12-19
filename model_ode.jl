@@ -50,34 +50,25 @@ function f(dX,X,p,t=0)
     c_lift, aircraft, physical_data, control, angle_function = p
     U = control(t,X[11],aircraft.dry_mass)
 
-    # assiette_rad = 2 * asin(sqrt(X[8]^2+X[9]^2+X[10]^2)) 
-    # assiette = assiette_rad * 180 / pi
-    # coeff_aero = get_coeff(c_lift,assiette)
-    # C_L = coeff_aero.Lift
-    # C_D = coeff_aero.Drag
-    # poids  = - X[11] * physical_data.g[3] 
-    # norm2_speed = (X[4]^2+X[5]^2+X[6]^2)
-    # etha_a = masse_volumique(X[3], pressure, physical_data.r,physical_data.T) * aircraft.Sw * 0.5
-    # cherche_eq = abs(U[1] - sin(assiette_rad) * poids - etha_a * norm2_speed * coeff_aero.Drag) > 1e-10
-
+    is_equilibrate = is_stable(X,U[1],(c_lift, aircraft, physical_data))
     
-    
-    if true#!cherche_eq
+    if is_equilibrate
         # sans vairation de masse
         assiette = 2 * asin(sqrt(X[8]^2+X[9]^2+X[10]^2)) * 180 / pi
+        
+        # if is_equilibrate && assiette != 5.
+        #     println("temps : ",t)
+        #     println("-------------- Ici, on est a l'équilibre----------------")
+        # end
         coeff_aero = get_coeff(c_lift,assiette)
         C_L = coeff_aero.Lift
         C_D = coeff_aero.Drag
     else 
         # essai pour echelon
         assiette = angle_function(t) #2 * asin(sqrt(X[8]^2+X[9]^2+X[10]^2)) * 180 / pi
-        
-        if abs(assiette - angle_echelon) < 0.1 &&  angle_function(t+dt) == assiette
-            assiette = angle_echelon
-            cherche_eq = false
-            println(assiette)
-        end 
-        
+        # if abs(assiette - angle_echelon) < 1e-2
+        #     assiette = angle_echelon
+        # end 
         X[7:10] .= angle2quaternion(assiette,[0,1,0])
         coeff_aero = get_coeff(c_lift,assiette)
         C_L = coeff_aero.Lift
@@ -112,10 +103,16 @@ function f(dX,X,p,t=0)
     @views dX[7:10] .= Rotations.kinematics(P_I2B,U[2:4])# 1/2 .* M * X[7:10] 
     @views dX[11] = 0#-aircraft.kt * U[1]                        # dot m = -kt * trhust : variation of fuel
     
-    if true#false
-        println("t = ",t, ", Vitesse = ",X[4:6], " Dérivée = ", dX[4:6])
+    if is_equilibrate && assiette != 5
+        println(" Dérivée = ", dX[4:6])
+    end
+    if assiette > 5.112 && assiette < 5.114#false
+        println("t = ",t, ",        Vitesse = ",sqrt(sum(X[4:6].^2)), ",", X[4:6], " Dérivée = ", dX[4:6])
         println("Assiette : ",assiette)
-        println("Pousse :", U[1])
+        #println("Pousse :", U[1])
+    end
+    if abs(X[6]) < 1e-5 && assiette != 5.
+        println("Angle à Vz = 0 : ", assiette, "    (module = ", sqrt(sum(X[4:6].^2)),")") 
     end
 
     return dX
