@@ -11,6 +11,25 @@ function iter_RK4(dX, X,p,t,step::Float64,f)
     return next_states
 end
 
+function RK4(t::Float64,T::Float64,dt::Float64,dX,X,p,f)
+    nb_iter = Int(floor(T/dt))+1
+    x_stockage = zeros(Float64,4,nb_iter)
+    x_stockage[:,1] = SA[X[1],X[2],X[3],X[11]]
+    iter = 1
+    while t < T  
+        t = t + dt 
+        X = iter_RK4(dX, X, p, t, dt, f)
+        x_stockage[:,iter] =  @SVector [X[1],X[2],X[3],X[11]]
+        iter += 1
+    end
+    return x_stockage # pos_x, pos_y, pos_z, m
+end
+
+
+##########################
+##        test          ##
+##########################
+
 function test_RK4()
     X = SA[0,0,0,1,0,0,0,15,0,0,300]
     dX = similar(X0)
@@ -26,19 +45,6 @@ function U_t(t,m)
     return SA[100,0,0,0]
 end
 
-function RK4(t::Float64,T::Float64,dt::Float64,dX,X,p,f)
-    nb_iter = Int(floor(T/dt))+1
-    x_stockage = zeros(Float64,4,nb_iter)
-    x_stockage[:,1] = SA[X[1],X[2],X[3],X[11]]
-    iter = 1
-    while t < T  
-        t = t + dt 
-        X = iter_RK4(dX, X, p, t, dt, f)
-        x_stockage[:,iter] =  @SVector [X[1],X[2],X[3],X[11]]
-        iter += 1
-    end
-    return x_stockage # pos_x, pos_y, pos_z, m
-end
 
 function test()
     # initialisation

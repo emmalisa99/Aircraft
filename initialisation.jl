@@ -1,3 +1,5 @@
+using Polynomials
+
 ###########################
 # Constants of the aircraft
 ###########################
@@ -8,7 +10,7 @@ const aircraft = avion()
 #######################
 # for solver resolution 
 #######################
-const Tmax = 10.
+const Tmax = 1.
 const T0 = 0.
 const dt = 0.01
 
@@ -22,14 +24,14 @@ function create_initial_state(position, angle_deg,aircraft_physical_data)
     # Position
     X0[1:3] = position
     # Orientation
-    w,x,y,z = angle2quaternion(angle_deg,[0,1,0])
+    w,x,y,z = angles2quaternion(0,-angle_deg*pi/180,0)
     X0[7:10] .= w,x,y,z
     # Vitesse
     c_lift, aircraft, physical_data = aircraft_physical_data
     V2 = angle2vitesse(angle_deg,X0[3],aircraft.gross_mass,aircraft_physical_data)^2
     v0x = sqrt(V2) 
-    v0y = 0#sqrt(V2/3)
-    v0z = 0#sqrt(V2/3)
+    v0y = 0
+    v0z = 0
     X0[4:6] .= v0x,v0y,v0z
     # Masse
     X0[11] = aircraft.gross_mass
@@ -65,9 +67,27 @@ poussee_echelon = 1.01 * poussee_init
 angle_echelon = find_angle(poussee_echelon, X0[11],aircraft_physical_data)
 
 
+# fonction pour faire évoluer la poussée(U[1])
+function linear_poussee(t0,tf,poussee_init,poussee_echelon,l,h)
+    return fit([t0,tf,t0+(tf-t0)*l],[poussee_init,poussee_echelon,poussee_echelon+(poussee_echelon-poussee_init)*h])
+end
+
+function evolve_thrust(t, poussee_init)
+    if  1 < t < 10
+        T = poussee_init + (t-1) * 10
+    elseif  10 <= t < 19
+        T = poussee_init - (t-19) * 10
+    else 
+        T = poussee_init
+    end
+    return T
+end
+
+# fonction définissant le controle
 function control(t,mass,dry_mass)
-    U = @MArray [poussee_init,0,0,0]
-    if t >= 1
+    T = poussee_init
+    U = @MArray [T,0,0,0]
+    if  false#3 > t >= 1
         U = @MArray [poussee_echelon,0,0,0]
     end
     if mass <= dry_mass

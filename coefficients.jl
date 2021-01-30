@@ -61,14 +61,13 @@ angle2coeff = Dict()
 # angle2coeff[13.5] = Coeff(1.51)
 # angle2coeff[15.] = Coeff(1.6)
 
-
 angle2coeff[2.] = Coeff(0.238)
 angle2coeff[4.] = Coeff(0.451)
 angle2coeff[6.] = Coeff(0.659)
 angle2coeff[8.] = Coeff(0.855)
 angle2coeff[10.] = Coeff(1.04)
 
-
+# extract coefficients in a list
 angles = [collect(keys(angle2coeff))...]
 coeff = collect(values(angle2coeff))
 lift = List_Lift(coeff)

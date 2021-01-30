@@ -5,36 +5,21 @@ using Plots
 include("equations_equilibre.jl")
 
 
-"""Modifier la valeur de l'angle voulu (en degré) et l'axe de rotation"""
-
-
-# Attention ce calcul ne prend pas en compte un 
-# cas plus complexe où l'axe d'inclinaison n'est pas quadratiq
-
-function angle2quaternion(angle_voulu,axes,degre=true)
-    if degre 
-        angle_voulu = angle_voulu * pi / 180
-    end
-    nb_axes_concerne = sum(axes)
-    xyz = sin( angle_voulu/2)
-    w = sqrt(1 - xyz^2)
-    angle_rotation = xyz * axes / nb_axes_concerne
-    return w,angle_rotation[1],angle_rotation[2],angle_rotation[3]
-end
-
-function test_angle2quaternion(angle_deg)
-    println("Angle en degré initial = 10")
-    print("Quaternion obtenu : ")
-    w,x,y,z = angle2quaternion(angle_deg,[0,1,0])
-    println(w,x,y,z)
-    println("Quaternion transformé en degré autour de [", x, ",",y,",",z ,"], est : ", 2 * acos(w) * 180 /pi, " ", 2 * asin(sqrt(x^2+y^2+z^2)) * 180 /pi)
-end
-
-
 ####################################################################
 ## Find an equation that change the intial angle to an echelon angle
 #################################################################### 
+
 function find_angle_polynome(theta1,theta2,t,tf,x_pt,a_pt)
+    """
+    Obj : creer une fonction polynome pour aller d'un angle theta 1 à un angle theta2 sur une durée de tf-t.
+    Input : 
+        - theta1 : angle de départ
+        - theta2 : angle d'arrivée
+        - t : temps signalant le début du changement d'anglemeny
+        - tf : temps signalant l'angle où on atteint l'angle theta2
+        - x_pt : abscisse en pourcentage pour placer le 3e point 
+        - a_pt : ordonnée en pourcentage pour placer le 3e point
+    """
     d_angle = abs(theta1 - theta2)
     t = [t, t+tf, t+(tf-t)*x_pt]
     angle = [theta1, theta2, theta2+d_angle*a_pt]
@@ -42,6 +27,14 @@ function find_angle_polynome(theta1,theta2,t,tf,x_pt,a_pt)
 end
 
 function find_angle_spline(d_temps,angle,angle_echelon,t_init)
+    """
+    Obj : creer une fonction spline pour aller d'un angle theta 1 à un angle theta2 sur une durée d_temps.
+    Input : 
+        - angle : angle de départ
+        - angle_echelon : angle d'arrivée
+        - t _init: temps signalant le début du changement d'anglement
+        - d_temps : durée pour atteindre l'angle échelon
+    """
     temps = [0,2.5,5,6.1,10,12,15.5,16]
     ord = [0.,5.,11.,12.,10.,9.5,10.,10.]
     len = size(temps)[1]

@@ -3,7 +3,8 @@
 ##################################
 function solve_problem(Tmax, X0, p, f)
     t_span = (0.,Tmax)
-    problem_ode = ODEProblem(f,[X0...],t_span,p,dtmax=0.1)
+    #alg = DifferentialEquations.RK4()
+    problem_ode = ODEProblem(f,[X0...],t_span,p,dt=0.02)
     solve(problem_ode)
 end
 
@@ -61,7 +62,8 @@ function plot_3D_option_forces(sol, p, option_forces=False, nb_forces=10)
         title = "3D Trajectory",
         marker = 2,
     )
-    plt = plot3d(trajectory[1,:], trajectory[2,:], trajectory[3,:],label="Trajectoire")
+        plot3d(trajectory[1,:], trajectory[2,:], trajectory[3,:],label="Trajectoire")
+    
 
     if option_forces
         d_inter = Int(floor(size(sol.t)[1]/nb_forces))

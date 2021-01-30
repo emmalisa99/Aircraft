@@ -2,6 +2,7 @@ using DifferentialEquations
 using Plots
 using BenchmarkTools
 using StaticArrays
+include("quaternions_lib.jl")
 include("structure_and_data.jl")
 include("angle_lib.jl")
 include("coefficients.jl")
@@ -11,6 +12,7 @@ include("ode_rk4.jl")
 include("initialisation.jl")
 
 
+
 ############
 # Parameters
 ############
@@ -18,12 +20,12 @@ include("initialisation.jl")
 # for visualisation and test
 test_benchmark = false
 
-julia_solver = false
-plot_3D = false
+julia_solver = true
+plot_3D = true
 option_forces = false
-plot_coord = false
+plot_coord = true
 
-rk4_solver = true
+rk4_solver = false
 plot_3D_rk4 = true
 option_forces_rk4 = false
 plot_coord_rk4 = true
@@ -50,8 +52,15 @@ if julia_solver
         make_benchmark(solve_problem,(Tmax, X0, p, f),"ODE solve")
     end
 
-    sol = solve_problem(Tmax, X0, p, f)
+    sol = solve_problem(Tmax, X0, p, f_turn)
     trajectory = hcat(sol.u...)
+    for t=1:size(sol.t)[1]
+        for i=1:3
+            if abs(sol.u[t][i]) < 1e-12
+                sol.u[t][i] = 0
+            end
+        end
+    end
 
     if plot_3D
         plot_3D_option_forces(sol, p, option_forces)
@@ -84,6 +93,14 @@ if rk4_solver
     println("Temps RK4 : ")
     @time x_stockage = RK4(T0,Tmax,dt,dX,X0,p,f)
 
+    for t=1:size(x_stockage)[2]
+        for i=1:3
+            if abs(x_stockage[i,t]) < 1e-10
+                x_stockage[i,t] = 0
+            end
+        end
+    end
+
     #println(typeof(x_stockage),size(x_stockage))
     #println("Solution : ", x_stockage)
 
@@ -115,6 +132,3 @@ if rk4_solver
     end
 end
 
-##### 
-## Obj : vitesse : [44.21407974371336,0,0] et angle = 5.112924169238338
-#####
